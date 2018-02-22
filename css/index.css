@@ -1,0 +1,18 @@
+body{
+    margin:0;
+    padding:0;
+    overflow:hidden;
+}
+header {
+    height: 30px;
+    background-color: #e5e5e5;
+}
+
+#container {
+    position: absolute;
+    width: 100%;
+	height: 100%;
+	background: red;
+    margin:0;
+    padding:0;
+}
