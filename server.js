@@ -3,16 +3,15 @@ const ipc   = require('electron').ipcRenderer;
 
 let server;
 let serverStarted = false;
+let serverHost;
 
 // default client
-let clientPort = 1111;
-let clientHost = '127.0.0.1';
+let client = {};
 
 // Received command 'start-server' from one of the renderer processes
 ipc.on('start-server', function(event, arg) {
     if (!serverStarted){
         startServer(arg[0],arg[1]);
-
         let myNotification = new Notification('CTR-SIMU', {
             body: 'Server started on ' + arg[1] + ':' + arg[0]
         })
@@ -24,17 +23,16 @@ ipc.on('start-server', function(event, arg) {
 });
 
 ipc.on('send-message', function(event, arg) {
-    ipc.send('send-to-log','Trying to send ' + arg + ' on ' + clientHost + ':' + clientPort);
-    //const buf = Buffer.from(arg, 'ascii');
-    sendMessage(clientPort, '127.0.0.1', arg);
+    logToMain('Trying to send a message to ' + client.host + ':' + client.port);
+    sendMessage(client.port, client.host, arg);
 });
 
 function sendMessage(port,host,message){
     server.send(message,port,host,function(error){
         if(error){
-            ipc.send('send-to-log','cant send data');
+            logToMain('cant send data');
         }else{
-            ipc.send('send-to-log','data sent');
+            logToMain('data sent');
         }
     });
 }
@@ -51,6 +49,7 @@ function startServer(port,host){
             alert('Server error:\n${err.stack}\nTry to restart the server');
             server.close();
         });
+        serverHost = host;
         server.bind(port, host);
     }else{
         serverStarted = false;
@@ -58,13 +57,22 @@ function startServer(port,host){
     }
 }
 
+function logToMain(message){
+    ipc.send('send-to-log',message);
+}
+
 function receiveMessage (message, remote) {
     // remote - who sended the message
+    
+    let temp = 222;
+    
     message = message.toString('utf8');
-
-    clientPort = remote.port;
-    clientHost = remote.host;
-    sendMessage(remote.port,serverHost,"OK");
+    logToMain('Message received from ' + serverHost + ':' + remote.port + ' (' + message + ')');
+    
+    client.port = remote.port;
+    client.host = serverHost;
+    
+    sendMessage(client.port,client.host,"OK");
 
     var msgArray = message.toString('utf8').split(",");
 
