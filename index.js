@@ -20,7 +20,8 @@ $("#btn-load-model").click(function() {
 // Received command 'start-server' from one of the renderer processes
 ipc.on('command', function(event, arg) {
     //console.log(model);
-    model.updateModel(arg);
+    var response = model.receiveMsg(arg);
+    ipc.send('to-server', ['send-message',response]);
 });
 
 function loadModelFileDialog(){

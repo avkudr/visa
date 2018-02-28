@@ -20,6 +20,7 @@ function createWindow() {
             nativeWindowOpen: true
         }
     }) 
+    mainWindow.maximize();
     mainWindow.loadURL('file://' + __dirname + '/index.html');
     mainWindow.toggleDevTools();
 

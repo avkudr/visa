@@ -70,9 +70,7 @@ function receiveMessage (message, remote) {
     logToMain('Message received from ' + serverHost + ':' + remote.port + ' (' + message + ')');
     
     client.port = remote.port;
-    client.host = serverHost;
-    
-    sendMessage(client.port,client.host,"OK");
+    client.host = serverHost;   
 
     var msgArray = message.toString('utf8').split(",");
 
@@ -83,7 +81,10 @@ function receiveMessage (message, remote) {
         q[i] = parseFloat(msgArray[i+1],10);
     }
 
-    if (isCmdLegal(cmd))  ipc.send('cmd-received',[cmd,q]);
+    ipc.send('cmd-received',[cmd,q]);
+
+    // if (isCmdLegal(cmd))  ipc.send('cmd-received',[cmd,q]);
+    // else sendMessage(client.port,client.host,"Unknown command");
     //else                  do something;
 }
 
@@ -91,13 +92,13 @@ function receiveMessage (message, remote) {
 // ─── MESSAGE HANDLING ───────────────────────────────────────────────────────────
 // 
 
-const knownCmds = [
-    'TYPEJOG', //choose movement type: 10-joint,11-current_tool,12-current_frame
-    'SETPOS',
-    'ADDPOS',
-]
+// const knownCmds = [
+//     'TYPEJOG', //choose movement type: 10-joint,11-current_tool,12-current_frame
+//     'SETPOS',
+//     'ADDPOS',
+// ]
 
-function isCmdLegal(cmd,q = []){
-    //check if the command is known
-    return knownCmds.includes(cmd);
-}
+// function isCmdLegal(cmd,q = []){
+//     //check if the command is known
+//     return knownCmds.includes(cmd);
+// }
