@@ -1,12 +1,8 @@
-var scene3d = document.getElementById("container");
-var cameraExt, scene, renderer,renderer2, controls;
-var camera;
-var tube, circle;
-var randomSpline;
+var sceneContainer = document.getElementById("container");
+var scene, cameraExt, rendererExt;
+var trackballControls;
+var camera, renderer;
 var robot;
-var frames;
-var windowManager;
-var subWindow;
 var modelObj;
 
 const dat   = require('dat.gui');
@@ -15,14 +11,7 @@ const TrackballControls = require('three-trackballcontrols');
 const MTLLoader = require('three-mtl-loader');
 const OBJLoader = require('three-obj-loader');
 const TWEEN = require('tween.js');
-
 const ConcentricTubeRobot = require('./rtc.js').ConcentricTubeRobot;
-
-var gui = new dat.GUI({ autoPlace: false });
-gui.domElement.style.position = 'absolute';
-gui.domElement.style.top = '10px';
-gui.domElement.style.right = '10px';
-scene3d.appendChild(gui.domElement);
 
 // Your existing code unmodified...
 var externalViewCanvas = document.createElement('div');
@@ -34,7 +23,17 @@ externalViewCanvas.style.bottom = '10px';
 externalViewCanvas.style.width = '640px';
 externalViewCanvas.style.height = '480px';
 externalViewCanvas.style.background = 'lightblue';
-scene3d.appendChild(externalViewCanvas);
+sceneContainer.appendChild(externalViewCanvas);
+
+// =============================================================================
+// GUI SETUP
+// =============================================================================
+
+var gui = new dat.GUI({ autoPlace: false });
+gui.domElement.style.position = 'absolute';
+gui.domElement.style.top = '10px';
+gui.domElement.style.right = '10px';
+sceneContainer.appendChild(gui.domElement);
 
 var FabricationParams = function () {
     this.length1 = 100;
@@ -147,6 +146,10 @@ function updateScene(type, pars) {
     updateCameraOnRobot();
 }
 
+// =============================================================================
+// MAIN PART
+// =============================================================================
+
 init();
 animate();
 
@@ -169,27 +172,27 @@ function updateCameraOnRobot(){
 function init() {
 
     // add main renderer window
-    renderer = new THREE.WebGLRenderer({alpha: true });
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.autoClear = false;
-    renderer.setClearColor(0x000000, 0.0);
-    renderer.setViewport( 0, 0, scene3d.offsetWidth, scene3d.offsetHeight);
-    scene3d.appendChild(renderer.domElement);
+    rendererExt = new THREE.WebGLRenderer({alpha: true });
+    rendererExt.setPixelRatio(window.devicePixelRatio);
+    rendererExt.setSize(window.innerWidth, window.innerHeight);
+    rendererExt.autoClear = false;
+    rendererExt.setClearColor(0x000000, 0.0);
+    rendererExt.setViewport( 0, 0, sceneContainer.offsetWidth, sceneContainer.offsetHeight);
+    sceneContainer.appendChild(rendererExt.domElement);
 
     // general configuration of the scene
     scene = new THREE.Scene();
 
     // add external camera
-    cameraExt = new THREE.PerspectiveCamera(45, scene3d.offsetWidth / scene3d.offsetHeight, 1, 2000);
+    cameraExt = new THREE.PerspectiveCamera(45, sceneContainer.offsetWidth / sceneContainer.offsetHeight, 1, 2000);
     cameraExt.position.set(400, -70, 241);
     cameraExt.rotation.set(0.718,0.780,0.436);
 
     cameraExt.up.set( 0, 0, 1 );
 
-    controls = new TrackballControls(cameraExt, renderer.domElement);
-    controls.minDistance = 200;
-    controls.maxDistance = 1000;
+    trackballControls = new TrackballControls(cameraExt, rendererExt.domElement);
+    trackballControls.minDistance = 200;
+    trackballControls.maxDistance = 1000;
 
     scene.add(new THREE.AmbientLight(0xffffff));
     var light = new THREE.PointLight(0xffffff);
@@ -238,7 +241,11 @@ function init() {
     
     var geometry = new THREE.PlaneGeometry( 32, 32, 5 );
     var texture = new THREE.TextureLoader().load( './models/ctr/assets/calib_target2.png' );
-    var material = new THREE.MeshBasicMaterial( {color: 0xffffff, side: THREE.DoubleSide, map: texture} );
+    var material = new THREE.MeshBasicMaterial({
+        color: 0xffffff, 
+        side: THREE.DoubleSide, 
+        map: texture
+    });
     var calibTarget = new THREE.Mesh( geometry, material );
     calibTarget.rotation.y = Math.PI / 2;
     calibTarget.position.x = 200;
@@ -249,34 +256,35 @@ function init() {
     robot.updateAll();   
     updateCameraOnRobot();  
 
-    renderer2 = new THREE.WebGLRenderer({
+    renderer = new THREE.WebGLRenderer({
         preserveDrawingBuffer: true,
         antialias: true
     });
-    renderer2.domElement.id = 'camera-image';
-    //renderer2.setPixelRatio(externalViewCanvas.devicePixelRatio);
-    renderer2.setSize(640,480);
-    renderer2.domElement.style.padding = '0px';
-    renderer2.domElement.style.margin = '0px';
-    renderer2.domElement.style.overflow = 'hidden';
-    renderer2.setClearColor( new THREE.Color(0x222222) );
-    externalViewCanvas.appendChild(renderer2.domElement);
+    renderer.domElement.id = 'camera-image';
+    renderer.setPixelRatio(externalViewCanvas.devicePixelRatio);
+    renderer.setSize(640,480);
+    renderer.domElement.style.padding = '0px';
+    renderer.domElement.style.margin = '0px';
+    renderer.domElement.style.overflow = 'hidden';
+    renderer.setClearColor( new THREE.Color(0x222222) );
+    externalViewCanvas.appendChild(renderer.domElement);
 }
 
 function animate() {
-    requestAnimationFrame( animate );
-    if (controls != undefined) controls.update();
-    renderer.render(scene, cameraExt); 
+    requestAnimationFrame( animate ); //loop animation
+    trackballControls.update();
+    rendererExt.render(scene, cameraExt); 
+    
     TWEEN.update();
     gui.updateDisplay();
     robot.updateAll();
     updateCameraOnRobot();
-    renderer2.render(scene, camera);
+    renderer.render(scene, camera);
 }
 
-//
-// ─── EMBEDDED CONTROLS ──────────────────────────────────────────────────────────
-//
+// =============================================================================
+// EMBEDDED CONTROLS
+// =============================================================================
 
 // keyboar controls
 window.addEventListener("keyup", function(e){
@@ -297,15 +305,15 @@ window.addEventListener("keyup", function(e){
 // on resize event
 window.addEventListener( 'resize', onWindowResize, false );
 function onWindowResize(){
-    cameraExt.aspect = scene3d.offsetWidth / scene3d.offsetHeight;
+    cameraExt.aspect = sceneContainer.offsetWidth / sceneContainer.offsetHeight;
     cameraExt.updateProjectionMatrix();
 
-    renderer.setSize( scene3d.offsetWidth, scene3d.offsetHeight );
+    rendererExt.setSize( sceneContainer.offsetWidth, sceneContainer.offsetHeight );
 }
 
 function saveImage(filePrefix){
     try {
-        imgData = renderer2.domElement.toDataURL();      
+        imgData = renderer.domElement.toDataURL();      
     } 
     catch(e) {
         console.log("First, you have to ckick on camera view");
@@ -321,12 +329,12 @@ function saveImage(filePrefix){
     link.click();
 }
 
-//
-// ─── SERVER COMMUNICATION ───────────────────────────────────────────────────────
-//  
+// =============================================================================
+// SERVER COMMUNTICATION
+// =============================================================================
 
 const MsgHandlerCTR = require('./msg_handler.js').MsgHandlerCTR;
-const msgHandler = new MsgHandlerCTR(robot, renderer2);
+const msgHandler = new MsgHandlerCTR(robot, renderer);
 
 var receiveMsg = function(arg){
     return msgHandler.handle(arg);
