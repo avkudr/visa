@@ -1,6 +1,27 @@
+
+
+// =============================================================================
+// GUI CONTROL PANEL
+// =============================================================================
+
 const dat   = require('dat.gui');
 
-var ControlPanel = function(sceneContainer,externalViewCanvasId,updateScene){
+var DOFs = function () {
+    this.rotation1 = 0;
+    this.rotation2 = 0;
+    this.rotation3 = 0;
+    this.translation1 = 0;
+    this.translation2 = 0;
+    this.translation3 = 0;
+}
+
+/**
+ * 
+ * @param {DOM element inside of which the control panel will be placed} sceneContainer 
+ * @param {Id of DOM element corresponding to camera view} externalViewCanvasId 
+ * @param {Function called if user changes smth} onControlPanelChange 
+ */
+var ControlPanel = function(sceneContainer,externalViewCanvasId,onControlPanelChange){
     //create control panel and place it in top rigth corner
     this.canvas = new dat.GUI({ autoPlace: false });
     this.canvas.domElement.style.position = 'absolute';
@@ -11,19 +32,20 @@ var ControlPanel = function(sceneContainer,externalViewCanvasId,updateScene){
     // FOLDER
     //add controlable elements
     // ! Units of control panel differs from units of robot joint values
-    this.q = new Array(6);
-    this.folderJointValues = gui.addFolder('Joint values');
-    this.folderJointValues.add(q[0], 'rotation1', -180, 180).listen(); // in mm
-    this.folderJointValues.add(q[1], 'rotation2', -180, 180).listen();
-    this.folderJointValues.add(q[2], 'rotation3', -180, 180).listen();
-    this.folderJointValues.add(q[3], 'translation1', -200, 200).step(0.2).listen(); //in deg
-    this.folderJointValues.add(q[4], 'translation2', -200, 200).step(0.2).listen();
-    this.folderJointValues.add(q[5], 'translation3', -200, 200).step(0.2).listen();
+    this.q = new DOFs();
+    this.folderJointValues = this.canvas.addFolder('Joint values');
+    this.folderJointValues.add(this.q, 'rotation1', -180, 180).listen(); // in mm
+    this.folderJointValues.add(this.q, 'rotation2', -180, 180).listen();
+    this.folderJointValues.add(this.q, 'rotation3', -180, 180).listen();
+    this.folderJointValues.add(this.q, 'translation1', -200, 200).step(0.2).listen(); //in deg
+    this.folderJointValues.add(this.q, 'translation2', -200, 200).step(0.2).listen();
+    this.folderJointValues.add(this.q, 'translation3', -200, 200).step(0.2).listen();
+    this.folderJointValues.open();
 
     //on changing parameters of each parameter in folder call ...
     for (var i in this.folderJointValues.__controllers) {
         this.folderJointValues.__controllers[i].onChange(function(value) {
-            updateScene('dofs', this);
+            onControlPanelChange(this);
         });
     }
 
@@ -61,17 +83,21 @@ ControlPanel.prototype.setMinMax = function(idx, min, max) {
 
 ControlPanel.prototype.getJointValues = function(){
     var qOut = new Array(6);
-    qOut[0] = this.q[0] / 180.0 * Math.PI; //to radians
-    qOut[1] = this.q[1] / 180.0 * Math.PI;
-    qOut[2] = this.q[2] / 180.0 * Math.PI;
-    qOut[3] = this.q[3] / 1000; // to meters
-    qOut[4] = this.q[4] / 1000;
-    qOut[5] = this.q[5] / 1000;
+    qOut[0] = this.q.rotation1 / 180.0 * Math.PI; //to radians
+    qOut[1] = this.q.rotation2 / 180.0 * Math.PI;
+    qOut[2] = this.q.rotation3 / 180.0 * Math.PI;
+    qOut[3] = this.q.translation1 / 1000; // to meters
+    qOut[4] = this.q.translation2 / 1000;
+    qOut[5] = this.q.translation3 / 1000;
     return qOut;
 }
 
 ControlPanel.prototype.setJointValues = function(q){
     this.q = q;
+}
+
+ControlPanel.prototype.updateDisplay = function(){
+    this.canvas.updateDisplay();
 }
 
 exports.ControlPanel = ControlPanel;
