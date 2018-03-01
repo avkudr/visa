@@ -34,7 +34,6 @@ externalViewCanvas.style.bottom = '10px';
 externalViewCanvas.style.width = '640px';
 externalViewCanvas.style.height = '480px';
 externalViewCanvas.style.background = 'lightblue';
-//externalViewCanvas.style.border = '2px solid 0xff8000';
 scene3d.appendChild(externalViewCanvas);
 
 var FabricationParams = function () {
@@ -173,7 +172,6 @@ function init() {
     renderer = new THREE.WebGLRenderer({alpha: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
-    //renderer.setClearColor( new THREE.Color(0x222222) );
     renderer.autoClear = false;
     renderer.setClearColor(0x000000, 0.0);
     renderer.setViewport( 0, 0, scene3d.offsetWidth, scene3d.offsetHeight);
@@ -181,8 +179,8 @@ function init() {
 
     // general configuration of the scene
     scene = new THREE.Scene();
-    //scene.background = new THREE.Color(0x222222);
 
+    // add external camera
     cameraExt = new THREE.PerspectiveCamera(45, scene3d.offsetWidth / scene3d.offsetHeight, 1, 2000);
     cameraExt.position.set(400, -70, 241);
     cameraExt.rotation.set(0.718,0.780,0.436);
@@ -273,14 +271,14 @@ function animate() {
     gui.updateDisplay();
     robot.updateAll();
     updateCameraOnRobot();
-
-    if (renderer2 !== undefined) renderer2.render(scene, camera);
+    renderer2.render(scene, camera);
 }
 
 //
 // ─── EMBEDDED CONTROLS ──────────────────────────────────────────────────────────
 //
 
+// keyboar controls
 window.addEventListener("keyup", function(e){
     var imgData, imgNode;
     
@@ -296,6 +294,7 @@ window.addEventListener("keyup", function(e){
     }
 });
 
+// on resize event
 window.addEventListener( 'resize', onWindowResize, false );
 function onWindowResize(){
     cameraExt.aspect = scene3d.offsetWidth / scene3d.offsetHeight;
@@ -326,74 +325,11 @@ function saveImage(filePrefix){
 // ─── SERVER COMMUNICATION ───────────────────────────────────────────────────────
 //  
 
+const MsgHandlerCTR = require('./msg_handler.js').MsgHandlerCTR;
+const msgHandler = new MsgHandlerCTR(robot, renderer2);
+
 var receiveMsg = function(arg){
-    const cmd  = arg[0];
-    const args = arg[1];
-
-    let isGUINeedsUpdate   = false;
-    let isRobotNeedsUpdate = false;
-    let isWrongParNb       = false;
-
-    if (cmd == 'SETPOS'){ 
-        if ( args.length != 6){
-            alert('Error -> ' + cmd + ': wrong number of arguments = ' + args.length + ', 6 expected.');
-        }
-        
-        q = robot.getJointPos(args);
-        var tween = new TWEEN.Tween(q).to(args, 500);
-        console.log('START')
-        tween.onUpdate(function(){
-            console.log('INPROGRESS')
-            robot.setJointPos(q);
-        });
-        tween.start();
-    }
-    if (cmd == 'ADDPOS'){
-        if ( args.length != 6){
-            alert('Error -> ' + cmd + ': wrong number of arguments = ' + args.length + ', 6 expected.');
-        }
-        let q = robot.getJointPos();
-        let sum = q.map(function (num, idx) { return num + args[idx]; }); 
-        
-        // This line creates an animation for robot movement
-        // Basically, every joint should move with its own speed which can't be done
-        // with current TWEEN implementation.
-        // So, everything moves with a mean speed of 0.1 mm/s and 0.1 deg/s
-        let temp = 0;
-        for( var i = 0; i < args.length; i++ ) temp += args[i];
-        let avg = temp/args.length;
-        
-        let tween = new TWEEN.Tween(q).to(sum, 1000*avg);
-
-        console.log('START')
-        tween.onUpdate(function(){
-            console.log('INPROGRESS');
-            robot.setJointPos(q);
-        });
-        tween.start();
-
-        // statusOK = robot.setJointPos(sum);
-        // if (statusOK) {
-        //     gui.updateDisplay();
-        //     robot.updateAll();
-        //     updateCameraOnRobot();
-        // }
-    }
-    if (cmd == 'GETIMAGE') return getImage();
+    return msgHandler.handle(arg);
 }
-
-//send on request?
-var getImage = function () {
-    try {
-        if (renderer2 === undefined){ 
-            return 'NO IMAGE TO SEND';    
-        }else{
-            return 'IMAGE:'+renderer2.domElement.toDataURL();
-        }
-    } 
-    catch(e) {
-        return 'ERROR';    
-    }
-};
 
 exports.receiveMsg = receiveMsg;
