@@ -18,6 +18,8 @@ MsgHandlerCTR.prototype.handle = function(arg){
     let isRobotNeedsUpdate = false;
     let isWrongParNb       = false;
 
+    console.log(this.robot);
+
     if (cmd == 'SETPOS'){ 
         if ( args.length != 6){
             alert('Error -> ' + cmd + ': wrong number of arguments = ' + args.length + ', 6 expected.');
@@ -39,22 +41,23 @@ MsgHandlerCTR.prototype.handle = function(arg){
         let q = this.robot.getJointPos();
         let sum = q.map(function (num, idx) { return num + args[idx]; }); 
         
+        this.robot.setJointPos(sum);
         // This line creates an animation for robot movement
         // Basically, every joint should move with its own speed which can't be done
         // with current TWEEN implementation.
         // So, everything moves with a mean speed of 0.1 mm/s and 0.1 deg/s
-        let temp = 0;
-        for( var i = 0; i < args.length; i++ ) temp += args[i];
-        let avg = temp/args.length;
+        // let temp = 0;
+        // for( var i = 0; i < args.length; i++ ) temp += args[i];
+        // let avg = temp/args.length;
         
-        let tween = new TWEEN.Tween(q).to(sum, 1000*avg);
+        // let tween = new TWEEN.Tween(q).to(sum, 1000*avg);
 
-        console.log('START')
-        tween.onUpdate(function(){
-            console.log('INPROGRESS' + this.robot);
-            this.robot.setJointPos(q);
-        });
-        tween.start();
+        // console.log('START')
+        // tween.onUpdate(function(){
+        //     console.log('INPROGRESS' + this.robot);
+        //     this.robot.setJointPos(q);
+        // });
+        // tween.start();
 
         // statusOK = robot.setJointPos(sum);
         // if (statusOK) {

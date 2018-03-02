@@ -172,6 +172,8 @@ function animate() {
     requestAnimationFrame( animate ); //loop animation
     
     robot.updateAll();
+
+    ctrlPanel.setJointValues(robot.getJointPos());
     ctrlPanel.updateDisplay();
     trackballControls.update();
     rendererExt.render(scene, cameraExt); 

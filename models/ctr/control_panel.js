@@ -1,5 +1,3 @@
-
-
 // =============================================================================
 // GUI CONTROL PANEL
 // =============================================================================
@@ -93,7 +91,12 @@ ControlPanel.prototype.getJointValues = function(){
 }
 
 ControlPanel.prototype.setJointValues = function(q){
-    this.q = q;
+    this.q.rotation1 = q[0] / Math.PI * 180.0; // to degrees
+    this.q.rotation2 = q[1] / Math.PI * 180.0;
+    this.q.rotation3 = q[2] / Math.PI * 180.0;
+    this.q.translation1 = q[3] * 1000; // to mm
+    this.q.translation2 = q[4] * 1000;
+    this.q.translation3 = q[5] * 1000;
 }
 
 ControlPanel.prototype.updateDisplay = function(){
