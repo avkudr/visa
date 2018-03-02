@@ -10,7 +10,6 @@ const THREE = require('three');
 const TrackballControls = require('three-trackballcontrols');
 const MTLLoader = require('three-mtl-loader');
 const OBJLoader = require('three-obj-loader');
-const TWEEN = require('tween.js');
 const ConcentricTubeRobot = require('./rtc.js').ConcentricTubeRobot;
 
 // =============================================================================
@@ -177,9 +176,7 @@ function animate() {
     ctrlPanel.updateDisplay();
     trackballControls.update();
     rendererExt.render(scene, cameraExt); 
-    
-    TWEEN.update();
-   
+      
     updateCameraOnRobot();
     renderer.render(scene, camera);
 }
