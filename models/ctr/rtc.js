@@ -56,9 +56,9 @@ var ConcentricTubeRobot = class {
             this.rho1   = q[3];
             this.rho2   = q[4];
             this.rho3   = q[5];
-            return 1;
+            return 'OK';
         } else {
-            return 0;
+            return 'ERROR';
         }
     }
 

@@ -22,7 +22,7 @@ MsgHandlerCTR.prototype.handle = function(arg){
             let qStart = this.robot.getJointPos();
             let qEnd = args; 
             
-            this.animateRobotMotion(qStart,qEnd);
+            this.robotMove(qStart,qEnd);
             return 'OK';
         }
         case 'ADDJOINTPOS':{
@@ -30,17 +30,17 @@ MsgHandlerCTR.prototype.handle = function(arg){
             let qStart = this.robot.getJointPos();
             let qEnd = qStart.map(function (num, idx) { return num + args[idx]; }); 
             
-            this.animateRobotMotion(qStart,qEnd);
+            this.robotMove(qStart,qEnd);
             return 'OK';
         }
         case 'HOMING':{
             let qStart = this.robot.getJointPos();
-            this.animateRobotMotion(qStart,[0,0,0,0,0,0]);
+            this.robotMove(qStart,[0,0,0,0,0,0]);
             return 'OK';
         }
         case 'SETJOINTVEL':{
             if ( args.length != 6) return 'ERROR:' + cmd + ': wrong number of arguments';
-            this.moveWithVel(args);             
+            this.robotMoveVel(args);             
             return 'OK';
         }
         case 'GETIMAGE':{
@@ -71,73 +71,105 @@ exports.MsgHandlerCTR = MsgHandlerCTR;
 // =============================================================================
 
 var samplingTime = 0.02; //s 
-var jointSpeedT = 0.005; //m/s -> for translation joints
-var jointSpeedR = 5.0 / 180.0 * Math.PI; //rad/s -> for rotation joints
-var nbIter = 0;
+var jointMaxSpeedT = 0.005; //m/s -> for translation joints
+var jointMaxSpeedR = 5.0 / 180.0 * Math.PI; //rad/s -> for rotation joints
+var nbIter;
 var timer;
 var qCurrent;
 var qIterations;
 
-MsgHandlerCTR.prototype.animate = function(){
-    let q = qCurrent;
-    for(let i=0;i<qCurrent.length;i++){
-        if (qIterations[i] != 0){
-            let speed;
-            if (i < 3) speed = jointSpeedR;
-            else       speed = jointSpeedT;
+/**
+ * This function moves the robot from `qStart` to `qEnd`. 
+ * It uses velocity control for `n` iterations to achieve desired position.
+ * All joints are synchronized
+ * ? currently, only square profile is implemented -> may be trapezoidal ?
+ * @param {number[]} qStart - starting joint values
+ * @param {number[]} qEnd   - joint values after the motion
+ */
+MsgHandlerCTR.prototype.robotMove = function(qStart,qEnd){ 
+    let qDiff = qStart.map(function (num, idx) { return qEnd[idx] - qStart[idx]; }); 
 
-            q[i] += Math.sign(qIterations[i])*speed*samplingTime;
-            qIterations[i] -= Math.sign(qIterations[i]);
+    // how much iterations is needed to achieve qEnd with given samlpling time and maximal velocity
+    qIterations = qDiff.map(function (num, idx) { return qDiff[idx]/samplingTime; }); 
+    qIterations[0] = qIterations[0] / jointMaxSpeedR;
+    qIterations[1] = qIterations[1] / jointMaxSpeedR;
+    qIterations[2] = qIterations[2] / jointMaxSpeedR;
+    qIterations[3] = qIterations[3] / jointMaxSpeedT;
+    qIterations[4] = qIterations[4] / jointMaxSpeedT;
+    qIterations[5] = qIterations[5] / jointMaxSpeedT;
+
+    let tempArray = qIterations.map(function (num, idx) { return Math.abs(qIterations[idx]); }); 
+    let nbIterFloat = Math.max.apply(Math, tempArray);
+    nbIter = Math.floor(nbIterFloat); //nbIter must be integer
+
+    // as nbIterFloat may not be interger, all values are multiplied by a factor to make in integer and
+    // therefore, adapt the velocities for other joints
+    let factor = nbIter / nbIterFloat;
+    qIterations = qIterations.map(function (num, idx) { return qIterations[idx] * factor; });
+
+    let jointVelMax = [jointMaxSpeedR,jointMaxSpeedR,jointMaxSpeedR,jointMaxSpeedT,jointMaxSpeedT,jointMaxSpeedT];
+    jointVelMax = jointVelMax.map(function (num, idx) { return jointVelMax[idx] * factor; });
+    
+    //calculate velocities to synchronize all joints
+    let jointVel = new Array(6);
+    for (let i = 0; i < jointVel.length; i++){
+        if ( qIterations[i] == 0) jointVel[i] = 0;
+        else{
+            if ( Math.round(qIterations[i]) == nbIter) jointVel[i] = jointVelMax[i];
+            else{
+                jointVel[i] = jointVelMax[i] / nbIter * Math.round(qIterations[i]);
+            }
         }
     }
 
-    this.robot.setJointPos(q);
-    qCurrent = q;
-    nbIter--;
-    if( nbIter == 0 ) clearInterval(timer);
-}
-
-MsgHandlerCTR.prototype.animateRobotMotion = function(qStart,qEnd){ 
-    let qDiff = qStart.map(function (num, idx) { return qEnd[idx] - qStart[idx]; }); 
-    qIterations = qDiff.map(function (num, idx) { return qDiff[idx]/samplingTime; }); 
-    qIterations[0] = qIterations[0] / jointSpeedR;
-    qIterations[1] = qIterations[1] / jointSpeedR;
-    qIterations[2] = qIterations[2] / jointSpeedR;
-    qIterations[3] = qIterations[3] / jointSpeedT;
-    qIterations[4] = qIterations[4] / jointSpeedT;
-    qIterations[5] = qIterations[5] / jointSpeedT;
-
-    let tempArray = qIterations.map(function (num, idx) { return Math.abs(qIterations[idx]); }); 
-    nbIter = Math.max.apply(Math, tempArray);
-    nbIter = Math.round(nbIter); //very important
-    qCurrent = qStart;
-    var self = this;
-    clearInterval(timer);
-    timer = setInterval( function(){self.animate();}, samplingTime * 1000);
+    // thus, all joint will move for nbIter iterations with jointVel velocities
+    this.robotMoveVel(jointVel,nbIter);
 } 
 
-MsgHandlerCTR.prototype.animateVel = function(velocitiesArray){
+/**
+ * This function actually moves the robot with velocity vector `velocitiesArray`. 
+ * It is called at a `samplingTime` frequency if the motion was requested.
+ * The number of calls is equal to
+ * - `Infinity` in velocity control,
+ * - or `n` in position control; `n` is calculated automatically
+ * @param {number[]} velocitiesArray - joint velocities
+ */
+MsgHandlerCTR.prototype.moveStep = function(velocitiesArray){
     let q = qCurrent;
     for(let i=0;i<qCurrent.length;i++){
         q[i] += velocitiesArray[i]*samplingTime;
     }
 
-    if (!this.robot.setJointPos(q));
-    qCurrent = q;
+    if (this.robot.setJointPos(q) == 'ERROR') { // ? refactor 
+        clearInterval(timer); // joint limit acheived -> stop all motion
+        nbIter = 0;
+    }
+    else qCurrent = q; // robot configuration changed
+
+    if (nbIter == undefined) nbIter = 0;
+    nbIter--;
+    if (nbIter <= 0) clearInterval(timer);
 }
 
-MsgHandlerCTR.prototype.moveWithVel = function(velocitiesArray){
+/**
+ * Move the robot with velocity vector `velocitiesArray` for `nbIter` iterations
+ * @param {number[]} velocitiesArray - joint velocities
+ * @param {number} nbIter - number of iterations
+ */
+MsgHandlerCTR.prototype.robotMoveVel = function(velocitiesArray, nbIter){
 
     function isZero(currentValue) {
         return currentValue == 0;
     }
 
+    if (nbIter == undefined) nbIter = Infinity;
+    console.log(nbIter);
     qCurrent = this.robot.getJointPos();
     isAllZeroVelocities = velocitiesArray.every(isZero);
     
     clearInterval(timer);
     if (!isAllZeroVelocities){
         var self = this;
-        timer = setInterval( function(){self.animateVel(velocitiesArray);}, samplingTime * 1000);
+        timer = setInterval( function(){self.moveStep(velocitiesArray);}, samplingTime * 1000);
     }   
 }
