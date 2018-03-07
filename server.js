@@ -67,6 +67,7 @@ function receiveMessage (message, remote) {
     let temp = 222;
     
     message = message.toString('utf8');
+    message = message.replace(/(\r\n|\n|\r)/gm,"");   
     logToMain('Message received from ' + serverHost + ':' + remote.port + ' (' + message + ')');
     
     client.port = remote.port;
@@ -75,7 +76,8 @@ function receiveMessage (message, remote) {
     var msgArray = message.toString('utf8').split(",");
 
     var cmd = msgArray[0];
-    
+ 
+
     let q = new Array( msgArray.length - 1 );
     for(var i = 0; i < q.length; i++){
         q[i] = parseFloat(msgArray[i+1],10);
