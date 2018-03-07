@@ -34,7 +34,7 @@ var onControlPanelChange = function(pars) {
 }
 
 const ControlPanel = require('./control_panel.js').ControlPanel;
-var ctrlPanel = new ControlPanel(sceneContainer, cameraViewContainer.id,onControlPanelChange);
+var ctrlPanel;
 
 // =============================================================================
 // MAIN PART
@@ -60,7 +60,7 @@ function updateCameraOnRobot(){
 function init() {
 
     // add main renderer window
-    rendererExt = new THREE.WebGLRenderer({alpha: true });
+    rendererExt = new THREE.WebGLRenderer({alpha: true, antialias:true });
     rendererExt.setPixelRatio(window.devicePixelRatio);
     rendererExt.setSize(window.innerWidth, window.innerHeight);
     rendererExt.autoClear = false;
@@ -136,14 +136,21 @@ function init() {
     });
     */
     
-    var geometry = new THREE.PlaneGeometry( 32, 32, 5 );
+    // Create calibration target
+    var geometry = new THREE.CubeGeometry( 32, 32, 3 );
     var texture = new THREE.TextureLoader().load( './models/ctr/assets/calib_target2.png' );
-    var material = new THREE.MeshBasicMaterial({
-        color: 0xffffff, 
-        side: THREE.DoubleSide, 
-        map: texture
-    });
-    var calibTarget = new THREE.Mesh( geometry, material );
+    var femtoLogo = new THREE.TextureLoader().load( './models/ctr/assets/femto_logo.png' );
+
+    var cubeMaterials = [ 
+        new THREE.MeshBasicMaterial({color:0xBBBBBB}),
+        new THREE.MeshBasicMaterial({color:0xBBBBBB}), 
+        new THREE.MeshBasicMaterial({color:0xBBBBBB}),
+        new THREE.MeshBasicMaterial({color:0xBBBBBB}), 
+        new THREE.MeshBasicMaterial({color:0xFFFFFF, map: femtoLogo}), 
+        new THREE.MeshBasicMaterial({color:0xFFFFFF, map: texture}), 
+    ]; 
+
+    var calibTarget = new THREE.Mesh( geometry, cubeMaterials );
     calibTarget.rotation.y = Math.PI / 2;
     calibTarget.position.x = 200;
     calibTarget.position.y = 0;
@@ -165,6 +172,8 @@ function init() {
     renderer.domElement.style.overflow = 'hidden';
     renderer.setClearColor( new THREE.Color(0x222222) );
     cameraViewContainer.appendChild(renderer.domElement);
+
+    ctrlPanel = new ControlPanel(sceneContainer, cameraViewContainer.id,onControlPanelChange);
 }
 
 function animate() {
