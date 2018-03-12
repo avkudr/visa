@@ -48,6 +48,9 @@ MsgHandlerCTR.prototype.handle = function(arg){
         case 'GETIMAGE':{
             return this.getImage();
         }
+        case 'GETJOINTPOS':{
+            return this.robot.getJointPos().toString();
+        }
         default: 
             return 'ERROR: unknown command';
     }
@@ -58,7 +61,7 @@ MsgHandlerCTR.prototype.getImage = function () {
         if (this.cameraRenderer === undefined){ 
             return 'NO IMAGE TO SEND';    
         }else{
-            return 'IMAGE:'+this.cameraRenderer.domElement.toDataURL();
+            return this.cameraRenderer.domElement.toDataURL();
         }
     } 
     catch(e) {
@@ -73,8 +76,8 @@ exports.MsgHandlerCTR = MsgHandlerCTR;
 // =============================================================================
 
 var samplingTime = 0.02; //s 
-var jointMaxSpeedT = 0.005; //m/s -> for translation joints
-var jointMaxSpeedR = 5.0 / 180.0 * Math.PI; //rad/s -> for rotation joints
+var jointMaxSpeedT = 0.02; //m/s -> for translation joints
+var jointMaxSpeedR = 10.0 / 180.0 * Math.PI; //rad/s -> for rotation joints
 var nbIter;
 var timer;
 var qCurrent;
