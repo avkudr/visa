@@ -26,7 +26,7 @@ var ConcentricTubeRobot = class {
             (1.473e-3)/2,
             (0.96e-3)/2
         ];
-        this.radiiExt = [ // external  
+        this.radiiExt = [ // external in m 
             (3.112e-3)/2,
             (2.032e-3)/2,
             (1.32e-3)/2
