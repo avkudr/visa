@@ -2,7 +2,7 @@
 // GUI CONTROL PANEL
 // =============================================================================
 
-const dat   = require('dat.gui');
+const dat   = require('./../../3rdparty/dat.gui.min.js');
 
 var DOFs = function () {
     this.rotation1 = 0;

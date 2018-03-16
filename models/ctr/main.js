@@ -138,7 +138,7 @@ function init() {
     
     // Create calibration target
     var geometry = new THREE.CubeGeometry( 32, 32, 3 );
-    var texture = new THREE.TextureLoader().load( './models/ctr/assets/calib_target2.png' );
+    var texture = new THREE.TextureLoader().load( './models/ctr/assets/calib_target.png' );
     var femtoLogo = new THREE.TextureLoader().load( './models/ctr/assets/femto_logo.png' );
 
     var cubeMaterials = [ 
