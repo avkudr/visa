@@ -17,6 +17,8 @@ const ConcentricTubeRobot = require('./rtc.js').ConcentricTubeRobot;
 // =============================================================================
 
 var onControlPanelChange = function(pars) {
+
+    msgHandler.handle(['STOP']);
     let statusOK;
     let q = ctrlPanel.getJointValues();
     
@@ -107,6 +109,8 @@ function init() {
 
     // tool-camera
     camera = new THREE.PerspectiveCamera(30, 640 / 480, 1, 250);
+    console.log("Camera focal length: " + camera.getFocalLength() + "mm");
+    console.log("Camera pixel size: " + camera.getFocalLength() * 640 / camera.getFilmWidth());
     camera.matrixAutoUpdate = false;
     cameraHelper = new THREE.CameraHelper( camera );
     cameraHelper.visible = false;

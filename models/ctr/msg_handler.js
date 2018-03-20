@@ -45,6 +45,11 @@ MsgHandlerCTR.prototype.handle = function(arg){
             this.robotMoveVel(args);             
             return 'OK';
         }
+        case 'STOP':{
+            console.log('stop robot motion command received');
+            this.robotMoveVel([0,0,0,0,0,0]);
+            return 'OK';
+        }
         case 'GETIMAGE':{
             return this.getImage();
         }

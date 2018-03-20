@@ -31,7 +31,7 @@ var ControlPanel = function(sceneContainer,externalViewCanvasId,onControlPanelCh
     //add controlable elements
     // ! Units of control panel differs from units of robot joint values
     this.q = new DOFs();
-    this.folderJointValues = this.canvas.addFolder('Joint values');
+    this.folderJointValues = this.canvas.addFolder('Robot');
     this.folderJointValues.add(this.q, 'rotation1', -180, 180).listen(); // in mm
     this.folderJointValues.add(this.q, 'rotation2', -180, 180).listen();
     this.folderJointValues.add(this.q, 'rotation3', -180, 180).listen();
@@ -46,6 +46,14 @@ var ControlPanel = function(sceneContainer,externalViewCanvasId,onControlPanelCh
             onControlPanelChange(this);
         });
     }
+
+    //BUTTON
+    //show/hide camera view
+    var self = this;
+    var stopBtn = { add:function(){ 
+        onControlPanelChange(self);
+    }};
+    this.folderJointValues.add(stopBtn,'add').name("Stop");
 
     //BUTTON
     //show/hide camera view
