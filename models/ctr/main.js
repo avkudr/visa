@@ -119,7 +119,7 @@ function init() {
     scene.add( cameraHelper );
 
     // model
-    var mtlLoader = new MTLLoader();
+    var mtlLoader = new THREE.MTLLoader();
     var objLoader = new THREE.OBJLoader();
     mtlLoader.setPath( './models/ctr/assets/' );
     mtlLoader.setTexturePath('./models/ctr/assets/textures/')
