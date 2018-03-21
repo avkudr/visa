@@ -8,8 +8,8 @@ var modelObj;
 
 const THREE = require('three');
 const TrackballControls = require('three-trackballcontrols');
-const MTLLoader = require('three-mtl-loader');
-const OBJLoader = require('three-obj-loader')(THREE);
+const MTLLoader = require('./../../3rdparty/MTLLoader.js');
+const OBJLoader = require('./../../3rdparty/OBJLoader.js');
 const ConcentricTubeRobot = require('./rtc.js').ConcentricTubeRobot;
 const parameters = require('./model.json'); // all configurable parameters like robot joint values or camera
 
