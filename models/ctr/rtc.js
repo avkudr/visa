@@ -2,7 +2,7 @@ const THREE = require('three');
 const Tube  = require('./tube.js').Tube;
 
 var ConcentricTubeRobot = class {
-    constructor() {
+    constructor(tubeLengths,tubeCurvatures) {
         //default joint values:
         this.alpha1 = 0; //radians
         this.alpha2 = 0;
@@ -11,13 +11,13 @@ var ConcentricTubeRobot = class {
         this.rho2 = 0;
         this.rho3 = 0;
 
-        this.initFabricationParams();
+        this.initFabricationParams(tubeLengths,tubeCurvatures);
         this.updateRobotKinematics();
         this.create3Dmodel(); //create3Dmodel
         this.initJointFrames();
     }
 
-    initFabricationParams(){
+    initFabricationParams(tubeLengths,tubeCurvatures){
         this.E = 40e9; // Modulus of elasticity (Young's modulus)
         
         // Tubes' radii
@@ -39,8 +39,8 @@ var ConcentricTubeRobot = class {
         }
 
         // Fabrication parameters of tubes
-        this.tubeKappa  = [0.41,7.2,9.76]; // 1/m - circular precurvatures
-        this.tubeLength = [40e-3,155e-3,200e-3]; // m - lengths of curved parts
+        this.tubeKappa  = (tubeCurvatures === undefined) ? [0.41,7.2,9.76] : tubeCurvatures; // 1/m - circular precurvatures
+        this.tubeLength = (tubeLengths === undefined) ? [40e-3,155e-3,200e-3] : tubeLengths; // m - lengths of curved parts
     }
 
     setJointPos(q){

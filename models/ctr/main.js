@@ -100,7 +100,7 @@ function init() {
     scene.add(light);
 
     // add robot 
-    robot = new ConcentricTubeRobot();
+    robot = new ConcentricTubeRobot(parameters.tubeLengths,parameters.tubeCurvatures);
     robot.setJointPos(parameters.jointValues);
     scene.add(robot.mesh);
 
