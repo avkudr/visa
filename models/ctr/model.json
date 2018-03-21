@@ -1,16 +1,9 @@
 {
-    "name": "ctr",
-    "version": "1.0.0",
-    "description": "Concentric Tube Robot",
-    "scripts": {
-      "start": "electron ."
-    },
-    "author": "Andrey V. Kudryavtsev",
-    "license": "GPL-3.0",
-    "devDependencies": {
-      "electron": "^1.7.9",
-      "jquery": "^3.2.1",
-      "three-js": "^79.0.0"
-    }
+  "entry": "main.js",
+  "robot": "ConcentricTubeRobot",
+  "jointValues": [0,0,0,0,0,0],
+  "camera":{
+    "width":640,
+    "height":480
   }
-  
+}

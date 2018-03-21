@@ -11,6 +11,7 @@ const TrackballControls = require('three-trackballcontrols');
 const MTLLoader = require('three-mtl-loader');
 const OBJLoader = require('three-obj-loader');
 const ConcentricTubeRobot = require('./rtc.js').ConcentricTubeRobot;
+const parameters = require('./model.json'); // all configurable parameters like robot joint values or camera
 
 // =============================================================================
 // GUI SETUP
@@ -76,8 +77,8 @@ function init() {
     cameraViewContainer.style.margin = '0';
     cameraViewContainer.style.left = '10px';
     cameraViewContainer.style.bottom = '10px';
-    cameraViewContainer.style.width = '640px';
-    cameraViewContainer.style.height = '480px';
+    cameraViewContainer.style.width = parameters.camera.width + 'px';
+    cameraViewContainer.style.height = parameters.camera.height + 'px';
     cameraViewContainer.style.background = 'lightblue';
     sceneContainer.appendChild(cameraViewContainer);
 
@@ -100,6 +101,7 @@ function init() {
 
     // add robot 
     robot = new ConcentricTubeRobot();
+    robot.setJointPos(parameters.jointValues);
     scene.add(robot.mesh);
 
     // background grid
@@ -108,9 +110,9 @@ function init() {
     scene.add(helper);
 
     // tool-camera
-    camera = new THREE.PerspectiveCamera(30, 640 / 480, 1, 250);
+    camera = new THREE.PerspectiveCamera(30, parameters.camera.width / parameters.camera.height, 1, 250);
     console.log("Camera focal length: " + camera.getFocalLength() + "mm");
-    console.log("Camera pixel size: " + camera.getFocalLength() * 640 / camera.getFilmWidth());
+    console.log("Camera pixel size: " + camera.getFocalLength() * parameters.camera.width / camera.getFilmWidth());
     camera.matrixAutoUpdate = false;
     cameraHelper = new THREE.CameraHelper( camera );
     cameraHelper.visible = false;
@@ -170,7 +172,7 @@ function init() {
     });
     renderer.domElement.id = 'camera-image';
     renderer.setPixelRatio(cameraViewContainer.devicePixelRatio);
-    renderer.setSize(640,480);
+    renderer.setSize(parameters.camera.width,parameters.camera.height);
     renderer.domElement.style.padding = '0px';
     renderer.domElement.style.margin = '0px';
     renderer.domElement.style.overflow = 'hidden';
