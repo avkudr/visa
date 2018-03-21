@@ -9,7 +9,7 @@ var modelObj;
 const THREE = require('three');
 const TrackballControls = require('three-trackballcontrols');
 const MTLLoader = require('three-mtl-loader');
-const OBJLoader = require('three-obj-loader');
+const OBJLoader = require('three-obj-loader')(THREE);
 const ConcentricTubeRobot = require('./rtc.js').ConcentricTubeRobot;
 const parameters = require('./model.json'); // all configurable parameters like robot joint values or camera
 
@@ -119,49 +119,32 @@ function init() {
     scene.add( cameraHelper );
 
     // model
-    
-    /*
-    var mtlLoader = new THREE.MTLLoader();
-    mtlLoader.setPath( './models/ctr/models/' );
+    var mtlLoader = new MTLLoader();
+    var objLoader = new THREE.OBJLoader();
+    mtlLoader.setPath( './models/ctr/assets/' );
+    mtlLoader.setTexturePath('./models/ctr/assets/textures/')
     console.log(mtlLoader.path);
-    mtlLoader.load( 'tinker.mtl', function( materials ) {
+    mtlLoader.load( 'tube.mtl', function( materials ) {
         materials.preload();
-        var objLoader = new THREE.OBJLoader();
-        objLoader.setMaterials( materials );
-        objLoader.setPath( './models/ctr/models/' );
-        objLoader.load( 'tinker.obj', function ( object ) {       
+        objLoader.setMaterials(materials);
+        objLoader.setPath( './models/ctr/assets/' );
+        objLoader.load( 'tube.obj', function ( object ) {       
+
             modelObj = object.clone();
-            modelObj.rotation.y = -Math.PI * 4 / 4; 
+            modelObj.traverse( function ( child ) {
+                if ( child instanceof THREE.Mesh ) {
+                    child.material.side = THREE.DoubleSide;
+                }
+            } );
+            modelObj.position.z = 50;
             modelObj.position.x = 80;
             modelObj.position.y = -10;
-            modelObj.position.z = 70;
+            modelObj.rotation.x = Math.PI;
+            modelObj.rotation.z = Math.PI;
             modelObj.scale.set(70,70,70);
-            modelObj.visible = false;
             scene.add( modelObj );
         });
     });
-    */
-    
-    // Create calibration target
-    var geometry = new THREE.CubeGeometry( 32, 32, 3 );
-    var texture = new THREE.TextureLoader().load( './models/ctr/assets/calib_target.png' );
-    var femtoLogo = new THREE.TextureLoader().load( './models/ctr/assets/femto_logo.png' );
-
-    var cubeMaterials = [ 
-        new THREE.MeshBasicMaterial({color:0xBBBBBB}),
-        new THREE.MeshBasicMaterial({color:0xBBBBBB}), 
-        new THREE.MeshBasicMaterial({color:0xBBBBBB}),
-        new THREE.MeshBasicMaterial({color:0xBBBBBB}), 
-        new THREE.MeshBasicMaterial({color:0xFFFFFF, map: femtoLogo}), 
-        new THREE.MeshBasicMaterial({color:0xFFFFFF, map: texture}), 
-    ]; 
-
-    var calibTarget = new THREE.Mesh( geometry, cubeMaterials );
-    calibTarget.rotation.y = Math.PI / 2;
-    calibTarget.position.x = 200;
-    calibTarget.position.y = 0;
-    calibTarget.position.z = 175;
-    scene.add( calibTarget );
 
     robot.updateAll();   
     updateCameraOnRobot();  
