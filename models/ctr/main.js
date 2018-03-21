@@ -8,8 +8,8 @@ var modelObj;
 
 const THREE = require('three');
 const TrackballControls = require('three-trackballcontrols');
-const MTLLoader = require('three-mtl-loader');
-const OBJLoader = require('three-obj-loader');
+const MTLLoader = require('./../../3rdparty/MTLLoader.js');
+const OBJLoader = require('./../../3rdparty/OBJLoader.js');
 const ConcentricTubeRobot = require('./rtc.js').ConcentricTubeRobot;
 const parameters = require('./model.json'); // all configurable parameters like robot joint values or camera
 
@@ -122,14 +122,15 @@ function init() {
     
     /*
     var mtlLoader = new THREE.MTLLoader();
-    mtlLoader.setPath( './models/ctr/models/' );
+    mtlLoader.setPath( './models/ctr/assets/' );
+    mtlLoader.setTexturePath( './models/ctr/assets/textures/' );
     console.log(mtlLoader.path);
-    mtlLoader.load( 'tinker.mtl', function( materials ) {
+    mtlLoader.load( 'tube.mtl', function( materials ) {
         materials.preload();
         var objLoader = new THREE.OBJLoader();
         objLoader.setMaterials( materials );
-        objLoader.setPath( './models/ctr/models/' );
-        objLoader.load( 'tinker.obj', function ( object ) {       
+        objLoader.setPath( './models/ctr/assets/' );
+        objLoader.load( 'tube.obj', function ( object ) {       
             modelObj = object.clone();
             modelObj.rotation.y = -Math.PI * 4 / 4; 
             modelObj.position.x = 80;
@@ -141,7 +142,7 @@ function init() {
         });
     });
     */
-    
+
     // Create calibration target
     var geometry = new THREE.CubeGeometry( 32, 32, 3 );
     var texture = new THREE.TextureLoader().load( './models/ctr/assets/calib_target.png' );
