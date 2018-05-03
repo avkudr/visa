@@ -66,7 +66,13 @@ MsgHandlerCTR.prototype.getImage = function () {
         if (this.cameraRenderer === undefined){ 
             return 'NO IMAGE TO SEND';    
         }else{
-            return this.cameraRenderer.domElement.toDataURL();
+	    let img = this.cameraRenderer.domElement.toDataURL();
+	    console.log('Image length: ' + img.length);
+	    if ( img.length < Infinity){
+            	return img;
+	    }else{
+		return 'Couldnt get image from canvas';    
+	    }
         }
     } 
     catch(e) {
@@ -164,7 +170,6 @@ MsgHandlerCTR.prototype.robotMoveVel = function(velocitiesArray, nbIter){
     }
 
     if (nbIter == undefined) nbIter = Infinity;
-    console.log(nbIter);
     qCurrent = this.robot.getJointPos();
     isAllZeroVelocities = velocitiesArray.every(isZero);
     

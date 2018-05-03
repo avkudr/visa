@@ -28,14 +28,30 @@ ipc.on('send-message', function(event, arg) {
 });
 
 function sendMessage(port,host,message){
-    server.send(message,port,host,function(error){
-        if(error){
-            logToMain('cant send data');
-        }else{
-            logToMain('data sent');
+    let msgLength = message.toString().length;
+    logToMain('msgLength: ' + msgLength);
+    if (msgLength > 60000){
+        logToMain('Trying to split the message into smaller packets');
+        msgArray = message.toString().match(/.{1,60000}/g);
+        logToMain('Sending big image: ' + msgArray.length + ' packets');
+        server.send("PACKAGE_LENGTH:"+ msgArray.length.toString() + "   ",port,host,function(error){sendMessageErrorCallback(error)});
+        server.send(msgLength.toString(),port,host,function(error){sendMessageErrorCallback(error)});
+        for (let i = 0; i < msgArray.length; i++){
+            server.send(msgArray[i],port,host,function(error){sendMessageErrorCallback(error)});
         }
-    });
+    }else{
+        server.send(message,port,host,function(error){sendMessageErrorCallback(error)});
+    }
 }
+
+function sendMessageErrorCallback(error){
+    if(error){
+        logToMain('cant send data');
+    }else{
+        logToMain('data sent');
+    }
+}
+
 
 function startServer(port,host){
     if (!serverStarted){
@@ -77,7 +93,6 @@ function receiveMessage (message, remote) {
 
     var cmd = msgArray[0];
  
-
     let q = new Array( msgArray.length - 1 );
     for(var i = 0; i < q.length; i++){
         q[i] = parseFloat(msgArray[i+1],10);
