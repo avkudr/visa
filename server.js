@@ -22,7 +22,6 @@ ipc.on('start-server', function(event, arg) {
         socket = sock;
         // Add a 'data' event handler to this instance of socket
         sock.on('data', function(msg) {
-            logToMain("Bassem + " + msg);
             receiveMessage(msg);
         });
     });
@@ -40,12 +39,23 @@ ipc.on('send-message', function(event, arg) {
     sendMessage(client.port, client.host, arg);
 });
 
+function isImage(message){
+    let imgPrefix = 'data:image';
+    return message.toString().startsWith(imgPrefix);
+}
+
 function sendMessage(port,host,message){
-    var prefix = "PACKAGE_LENGTH:" + message.toString().length;    
-    var complete = new Array(50 - prefix.length + 1).join( 'a' );
-    prefix += complete;
-    logToMain(prefix);
-    socket.write(prefix + "\n");    
+    if ( isImage(message) ){
+        var prefix = "PACKAGE_LENGTH:" + message.toString().length;    
+        var complete = new Array(50 - prefix.length + 1).join( '_' );
+        prefix += complete;
+        socket.write(prefix + "\n");    
+    }else{
+        if (message.toString().length < 51){
+            var complete = new Array(50 - message.toString().length + 1).join( '_' );
+            message = message + '' + complete;
+        }
+    }    
     socket.write(message + "\n");
 }
 
