@@ -1,25 +1,38 @@
-const dgram = require('dgram');
-const ipc   = require('electron').ipcRenderer; 
+const net = require('net');
+const ipc  = require('electron').ipcRenderer; 
 
 let server;
+var client = [];
+var socket = [];
 let serverStarted = false;
 let serverHost;
 
-// default client
-let client = {};
+let port;
 
 // Received command 'start-server' from one of the renderer processes
 ipc.on('start-server', function(event, arg) {
-    if (!serverStarted){
-        startServer(arg[0],arg[1]);
-        let myNotification = new Notification('CTR-SIMU', {
-            body: 'Server started on ' + arg[1] + ':' + arg[0]
-        })
-    }else{
-        let myNotification = new Notification('CTR-SIMU', {
-            body: 'Server is already active'
-        })
-    }
+
+    server = net.createServer();
+
+    server.on('connection', function(sock) {   
+        logToMain('CONNECTED: ' + sock.remoteAddress +':'+ sock.remotePort);
+        // other stuff is the same from here
+        client.port = sock.remotePort;
+        client.host = sock.remoteAddress; 
+        socket = sock;
+        // Add a 'data' event handler to this instance of socket
+        sock.on('data', function(msg) {
+            logToMain("Bassem + " + msg);
+            receiveMessage(msg);
+        });
+    });
+           
+    // Add a 'close' event handler to this instance of socket
+    server.on('close', function(data) {
+        console.log('CLOSED: ' + server.remoteAddress +' '+ server.remotePort);
+    });       
+
+    server.listen(arg[0], arg[1]);
 });
 
 ipc.on('send-message', function(event, arg) {
@@ -28,45 +41,27 @@ ipc.on('send-message', function(event, arg) {
 });
 
 function sendMessage(port,host,message){
-    let msgLength = message.toString().length;
-    logToMain('msgLength: ' + msgLength);
-    if (msgLength > 60000){
-        logToMain('Trying to split the message into smaller packets');
-        msgArray = message.toString().match(/.{1,60000}/g);
-        logToMain('Sending big image: ' + msgArray.length + ' packets');
-        server.send("PACKAGE_LENGTH:"+ msgArray.length.toString() + "   ",port,host,function(error){sendMessageErrorCallback(error)});
-        server.send(msgLength.toString(),port,host,function(error){sendMessageErrorCallback(error)});
-        for (let i = 0; i < msgArray.length; i++){
-            server.send(msgArray[i],port,host,function(error){sendMessageErrorCallback(error)});
-        }
-    }else{
-        server.send(message,port,host,function(error){sendMessageErrorCallback(error)});
-    }
+    var prefix = "PACKAGE_LENGTH:" + message.toString().length;    
+    var complete = new Array(50 - prefix.length + 1).join( 'a' );
+    prefix += complete;
+    logToMain(prefix);
+    socket.write(prefix + "\n");    
+    socket.write(message + "\n");
 }
-
-function sendMessageErrorCallback(error){
-    if(error){
-        logToMain('cant send data');
-    }else{
-        logToMain('data sent');
-    }
-}
-
 
 function startServer(port,host){
     if (!serverStarted){
-        server = dgram.createSocket('udp4');
+        server.listen(port, host);
         server.on('listening', function () { 
             console.log("Server started");
             serverStarted = true;
         });
-        server.on('message', receiveMessage);
+        server.on('data', receiveMessage);
         server.on('error', (err) => {
             alert('Server error:\n${err.stack}\nTry to restart the server');
             server.close();
         });
         serverHost = host;
-        server.bind(port, host);
     }else{
         serverStarted = false;
         server.close();
@@ -77,22 +72,18 @@ function logToMain(message){
     ipc.send('send-to-log',message);
 }
 
-function receiveMessage (message, remote) {
+function receiveMessage (message) {
     // remote - who sended the message
     
     let temp = 222;
     
     message = message.toString('utf8');
     message = message.replace(/(\r\n|\n|\r)/gm,"");   
-    logToMain('Message received from ' + serverHost + ':' + remote.port + ' (' + message + ')');
+    logToMain('Message received from ' + client.host + ':' + client.port + ' (' + message + ')');
     
-    client.port = remote.port;
-    client.host = serverHost;   
-
     var msgArray = message.toString('utf8').split(",");
-
     var cmd = msgArray[0];
- 
+
     let q = new Array( msgArray.length - 1 );
     for(var i = 0; i < q.length; i++){
         q[i] = parseFloat(msgArray[i+1],10);
