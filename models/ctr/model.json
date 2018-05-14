@@ -1,7 +1,7 @@
 {
   "entry": "main.js",
   "robot": "ConcentricTubeRobot",
-  "jointValues": [0,0,0,-0.039,-0.120,-0.160],
+  "jointValues": [0,0,0,-0.023,-0.120,-0.160],
   "tubeCurvatures": [0.41,7.2,9.76],
   "tubeLengths": [40e-3,155e-3,200e-3],
   "camera":{
