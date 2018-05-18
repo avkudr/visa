@@ -56,6 +56,10 @@ MsgHandlerCTR.prototype.handle = function(arg){
         case 'GETJOINTPOS':{
             return this.robot.getJointPos().toString();
         }
+        case 'GETTOOLPOS':{ //returns matrix elements in a column-major order
+            let T = this.robot.getToolTransform().toArray().toString();
+            return T;
+        }
         default: 
             return 'ERROR: unknown command';
     }
@@ -87,7 +91,7 @@ exports.MsgHandlerCTR = MsgHandlerCTR;
 // =============================================================================
 
 var samplingTime = 0.02; //s 
-var jointMaxSpeedT = 0.02; //m/s -> for translation joints
+var jointMaxSpeedT = 0.004; //m/s -> for translation joints
 var jointMaxSpeedR = 10.0 / 180.0 * Math.PI; //rad/s -> for rotation joints
 var nbIter;
 var timer;

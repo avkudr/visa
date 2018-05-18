@@ -47,12 +47,12 @@ function isImage(message){
 function sendMessage(port,host,message){
     if ( isImage(message) ){
         var prefix = "PACKAGE_LENGTH:" + message.toString().length;    
-        var complete = new Array(50 - prefix.length + 1).join( '_' );
+        var complete = new Array(500 - prefix.length).join( '_' );
         prefix += complete;
         socket.write(prefix + "\n");    
     }else{
-        if (message.toString().length < 51){
-            var complete = new Array(50 - message.toString().length + 1).join( '_' );
+        if (message.toString().length < 500){
+            var complete = new Array(500 - message.toString().length).join( '_' );
             message = message + '' + complete;
         }
     }    

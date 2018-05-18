@@ -89,6 +89,8 @@ function init() {
     cameraExt = new THREE.PerspectiveCamera(45, sceneContainer.offsetWidth / sceneContainer.offsetHeight, 1, 2000);
     cameraExt.position.set(400, -70, 241);
     cameraExt.up.set( 0, 0, 1 );
+	console.log("Camera projection matrix: ");
+	console.log(cameraExt.projectionMatrix);
 
     trackballControls = new TrackballControls(cameraExt, rendererExt.domElement);
     trackballControls.minDistance = 200;
