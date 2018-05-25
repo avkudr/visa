@@ -91,7 +91,7 @@ exports.MsgHandlerCTR = MsgHandlerCTR;
 // =============================================================================
 
 var samplingTime = 0.02; //s 
-var jointMaxSpeedT = 0.004; //m/s -> for translation joints
+var jointMaxSpeedT = 0.002; //m/s -> for translation joints
 var jointMaxSpeedR = 10.0 / 180.0 * Math.PI; //rad/s -> for rotation joints
 var nbIter;
 var timer;
