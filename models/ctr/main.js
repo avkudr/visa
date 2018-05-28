@@ -138,16 +138,16 @@ function init() {
                     child.material.side = THREE.DoubleSide;
                 }
             } );
-//            modelObj.position.z = 50;
-//            modelObj.position.x = 80;
-//            modelObj.position.y = -10;
-            modelObj.position.z = 40;
-            modelObj.position.x = 45;
-            modelObj.position.y = -7;
+            modelObj.position.z = 50;
+            modelObj.position.x = 80;
+            modelObj.position.y = -10;
+//            modelObj.position.z = 40;
+//            modelObj.position.x = 45;
+//            modelObj.position.y = -7;
             modelObj.rotation.x = Math.PI;
             modelObj.rotation.z = Math.PI;
-            modelObj.scale.set(40,40,40);
-//            modelObj.scale.set(70,70,70);
+//            modelObj.scale.set(40,40,40);
+            modelObj.scale.set(70,70,70);
             scene.add( modelObj );
         });
     });
