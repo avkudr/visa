@@ -1,7 +1,7 @@
 {
-  "name": "visp-simu",
+  "name": "visa",
   "version": "1.0.0",
-  "description": "Simulation Tool for ViSP library",
+  "description": "ViSP Simulation App",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
@@ -10,10 +10,9 @@
   "license": "GPL-3.0",
   "dependencies": {
     "electron": "^1.7.9",
-    "jquery": "^3.2.1",
     "net": "^1.0.2",
+    "npm": "^6.1.0",
     "three": "^0.86.0",
-    "three-trackballcontrols": "0.0.7",
-    "tween.js": "^16.6.0"
+    "three-trackballcontrols": "0.0.7"
   }
 }
