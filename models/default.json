@@ -1,0 +1,31 @@
+{
+    "objects":[
+        {
+            "file":"tube.obj",
+            "scale":[35,35,35],
+            "position":[0,0,20],
+            "rotation":[1.57,0,0]  
+        }
+    ],
+    "robots":[
+        {
+            "type": "ConcentricTubeRobot",
+            "jointValues": [0,0,0,-0.023,-0.120,-0.160],
+            "position":[0,0,0],
+            "rotation":[0,0,0],
+            "scale": 500,
+            "tubeCurvatures": [0.41,7.2,9.76],
+            "tubeLengths": [40e-3,155e-3,200e-3]
+        }
+    ],
+    "cameras":[
+        {
+            "fieldOfView": 30,
+            "width": 640,
+            "height": 480,
+            "relativeTo": "robots.0.endeffector",
+            "position":[0,0,0],
+            "rotation":[0,0,-1.57]
+        }
+    ]
+}

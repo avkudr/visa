@@ -1,14 +1,16 @@
 /**
  * 
  * @param {A robot you want to control} robot 
- * @param {Object of type THREE.WebGLRenderer} cameraRenderer 
  */
-var MsgHandlerCTR = function(robot,cameraRenderer){
+var RobotController = function(robot){
     this.robot = robot;
-    this.cameraRenderer = cameraRenderer;
 }
 
-MsgHandlerCTR.prototype.handle = function(arg){
+RobotController.prototype.setRobot = function(robot){
+    this.robot = robot;
+} 
+
+RobotController.prototype.handle = function(arg){
     const cmd  = arg[0];
     const args = arg[1];
 
@@ -20,7 +22,7 @@ MsgHandlerCTR.prototype.handle = function(arg){
     switch(cmd) {
         case 'SETJOINTPOS':
         case 'SETJOINTPOSABS':{             
-            if ( args.length != 6) return 'ERROR:' + cmd + ': wrong number of arguments';
+            if ( args.length != this.robot.getNbDOFs()) return 'ERROR:' + cmd + ': wrong number of arguments';
             let qStart = this.robot.getJointPos();
             let qEnd = args; 
             
@@ -28,7 +30,7 @@ MsgHandlerCTR.prototype.handle = function(arg){
             return 'OK';
         }
         case 'SETJOINTPOSREL':{
-            if ( args.length != 6) return 'ERROR:' + cmd + ': wrong number of arguments';
+            if ( args.length != this.robot.getNbDOFs()) return 'ERROR:' + cmd + ': wrong number of arguments';
             let qStart = this.robot.getJointPos();
             let qEnd = qStart.map(function (num, idx) { return num + args[idx]; }); 
             
@@ -37,21 +39,20 @@ MsgHandlerCTR.prototype.handle = function(arg){
         }
         case 'HOMING':{
             let qStart = this.robot.getJointPos();
-            this.robotMove(qStart,[0,0,0,0,0,0]);
+            let jointPosZeros = Array.apply(null, Array(robot.getNbDOFs())).map(Number.prototype.valueOf,0);
+            this.robotMove(qStart,jointPosZeros);
             return 'OK';
         }
         case 'SETJOINTVEL':{
-            if ( args.length != 6) return 'ERROR:' + cmd + ': wrong number of arguments';
+            if ( args.length != this.robot.getNbDOFs()) return 'ERROR:' + cmd + ': wrong number of arguments';
             this.robotMoveVel(args);             
             return 'OK';
         }
         case 'STOP':{
             console.log('stop robot motion command received');
-            this.robotMoveVel([0,0,0,0,0,0]);
+            let jointVelZeros = Array.apply(null, Array(this.robot.getNbDOFs())).map(Number.prototype.valueOf,0);
+            this.robotMoveVel(jointVelZeros);
             return 'OK';
-        }
-        case 'GETIMAGE':{
-            return this.getImage();
         }
         case 'GETJOINTPOS':{
             return this.robot.getJointPos().toString();
@@ -61,30 +62,20 @@ MsgHandlerCTR.prototype.handle = function(arg){
             return T;
         }
         default: 
-            return 'ERROR: unknown command';
+            return 'unknown_command';
     }
 }
 
-MsgHandlerCTR.prototype.getImage = function () {
-    try {
-        if (this.cameraRenderer === undefined){ 
-            return 'NO IMAGE TO SEND';    
-        }else{
-	    let img = this.cameraRenderer.domElement.toDataURL();
-	    console.log('Image length: ' + img.length);
-	    if ( img.length < Infinity){
-            	return img;
-	    }else{
-		return 'Couldnt get image from canvas';    
-	    }
-        }
-    } 
-    catch(e) {
-        return 'ERROR';    
-    }
-};
+RobotController.prototype.stop = function(){
+    let jointVelZeros = Array.apply(null, Array(this.robot.getNbDOFs())).map(Number.prototype.valueOf,0);
+    this.robotMoveVel(jointVelZeros);
+}
 
-exports.MsgHandlerCTR = MsgHandlerCTR;
+RobotController.prototype.showAxes = function(show){
+    //show hide robot axes...
+}
+
+exports.RobotController = RobotController;
 
 // =============================================================================
 // ANIMATION PART
@@ -105,18 +96,15 @@ var qCurrent;
  * @param {number[]} qStart - starting joint values
  * @param {number[]} qEnd   - joint values after the motion
  */
-MsgHandlerCTR.prototype.robotMove = function(qStart,qEnd){ 
+RobotController.prototype.robotMove = function(qStart,qEnd){ 
     let qDiff = qStart.map(function (num, idx) { return qEnd[idx] - qStart[idx]; }); 
 
     // how much iterations is needed to achieve qEnd with given samlpling time and maximal velocity
-    let qIterations = new Array(6);
-    qIterations[0] = qDiff[0] / jointMaxSpeedR / samplingTime ;
-    qIterations[1] = qDiff[1] / jointMaxSpeedR / samplingTime ;
-    qIterations[2] = qDiff[2] / jointMaxSpeedR / samplingTime ;
-    qIterations[3] = qDiff[3] / jointMaxSpeedT / samplingTime ;
-    qIterations[4] = qDiff[4] / jointMaxSpeedT / samplingTime ;
-    qIterations[5] = qDiff[5] / jointMaxSpeedT / samplingTime ;
-
+    let qIterations = new Array(this.robot.getNbDOFs());
+    for (let i = 0; i < this.robot.getNbDOFs(); i++){
+        let jointMaxSpeed = (this.robot.jointTypes[i] == 'P') ? jointMaxSpeedT : jointMaxSpeedR;
+        qIterations[i] = qDiff[i] / jointMaxSpeed / samplingTime ;
+    }        
     let tempArray = qIterations.map(function (num, idx) { return Math.abs(qIterations[idx]); }); 
     let nbIterFloat = Math.max.apply(Math, tempArray);
     nbIter = Math.ceil(nbIterFloat); //nbIter must be integer
@@ -130,7 +118,7 @@ MsgHandlerCTR.prototype.robotMove = function(qStart,qEnd){
     jointVelMax = jointVelMax.map(function (num, idx) { return jointVelMax[idx] / factor; });
     
     //calculate velocities to synchronize all joints
-    let jointVel = new Array(6);
+    let jointVel = new Array(this.robot.getNbDOFs());
     for (let i = 0; i < jointVel.length; i++){
         jointVel[i] = jointVelMax[i] / nbIter * qIterations[i];
     }
@@ -148,7 +136,7 @@ MsgHandlerCTR.prototype.robotMove = function(qStart,qEnd){
  * - or `n` in position control; `n` is calculated automatically
  * @param {number[]} velocitiesArray - joint velocities
  */
-MsgHandlerCTR.prototype.moveStep = function(velocitiesArray, nbIter){
+RobotController.prototype.moveStep = function(velocitiesArray, nbIter){
     let q = qCurrent;
     for(let i=0;i<qCurrent.length;i++){
         q[i] += velocitiesArray[i]*samplingTime;
@@ -167,7 +155,7 @@ MsgHandlerCTR.prototype.moveStep = function(velocitiesArray, nbIter){
  * @param {number[]} velocitiesArray - joint velocities
  * @param {number} nbIter - number of iterations
  */
-MsgHandlerCTR.prototype.robotMoveVel = function(velocitiesArray, nbIter){
+RobotController.prototype.robotMoveVel = function(velocitiesArray, nbIter){
 
     function isZero(currentValue) {
         return currentValue == 0;

@@ -1,8 +1,7 @@
-/models/ctr/assets/*
-!/models/ctr/assets/calib_target.png
-!/models/ctr/assets/calib_target2.png  
-!/models/ctr/assets/femto_logo.png  
 /node_modules/
 /node_modules/*
-*.txt
 package-lock.json
+/models/_*.json
+/models/robots/FrankaPanda/
+/models/robots/FrankaPanda/*
+

@@ -1,8 +1,8 @@
+const THREE = require('three');
+
 /**
  * @author mrdoob / http://mrdoob.com/
  */
-
-const THREE = require('three');
 
 THREE.OBJLoader = ( function () {
 
@@ -393,6 +393,8 @@ THREE.OBJLoader = ( function () {
 		setPath: function ( value ) {
 
 			this.path = value;
+
+			return this;
 
 		},
 

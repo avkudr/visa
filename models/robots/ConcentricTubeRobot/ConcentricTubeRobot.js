@@ -1,20 +1,58 @@
+/*
+base class for ConcentricTubeRobot
+
+- bug: there is a small memory leak from TubeBufferGeometry
+*/
+
 const THREE = require('three');
 const Tube  = require('./tube.js').Tube;
 
 var ConcentricTubeRobot = class {
     constructor(tubeLengths,tubeCurvatures) {
         //default joint values:
-        this.alpha1 = 0; //radians
-        this.alpha2 = 0;
-        this.alpha3 = 0;
-        this.rho1 = 0; // m
-        this.rho2 = 0;
-        this.rho3 = 0;
+        this.q0 = 0; //radians
+        this.q1 = 0;
+        this.q2 = 0;
+        this.q3 = 0; // m
+        this.q4 = 0;
+        this.q5 = 0;
+        
+        this.oldJointValues = [0,0,0,0,0,0];
+
+        this.scale = 1;
+        this.position = [0,0,0];
+        this.rotation = [0,0,0];
+        this.jointTypes = ['R','R','R','P','P','P']; // Rotoidal/Prismatic
+        this.jointNames = [
+            'alpha1 (rad)',
+            'alpha2 (rad)',
+            'alpha3 (rad)',
+            'rho1 (m)',
+            'rho2 (m)',
+            'rho3 (m)'];
+
+        this.endEffectorPose = new THREE.Matrix4(); // in world frame
+        this.axesVisible = false;
 
         this.initFabricationParams(tubeLengths,tubeCurvatures);
         this.updateRobotKinematics();
         this.create3Dmodel(); //create3Dmodel
         this.initJointFrames();
+    }
+
+    getJointLimits(){
+        let limits = [
+            [-3.14,3.14],
+            [-3.14,3.14],
+            [-3.14,3.14],
+            [-0.2,0.2],
+            [-0.2,0.2],
+            [-0.2,0.2]
+        ];
+        return limits;
+    }
+    getNbDOFs(){
+        return 6;
     }
 
     initFabricationParams(tubeLengths,tubeCurvatures){
@@ -44,30 +82,41 @@ var ConcentricTubeRobot = class {
     }
 
     setJointPos(q){
-        this.alpha1 = q[0];
-        this.alpha2 = q[1];
-        this.alpha3 = q[2];
+        this.q0 = q[0];
+        this.q1 = q[1];
+        this.q2 = q[2];
+
+        this.oldJointValues[0] = q[0];
+        this.oldJointValues[1] = q[1];
+        this.oldJointValues[2] = q[2];
 
         var L1 = this.tubeLength[0] + q[3];        
         var L2 = this.tubeLength[1] + q[4] - L1;        
         var L3 = this.tubeLength[2] + q[5] - L2 - L1;        
 
         if (L1 >= 0 && L2 >= 0 && L3 >= 0){
-            this.rho1   = q[3];
-            this.rho2   = q[4];
-            this.rho3   = q[5];
+            this.q3                = q[3];
+            this.q4                = q[4];
+            this.q5                = q[5];
+            this.oldJointValues[3] = q[3];
+            this.oldJointValues[4] = q[4];
+            this.oldJointValues[5] = q[5];
             return 'OK';
         } else {
+            this.q3 = this.oldJointValues[3];
+            this.q4 = this.oldJointValues[4];
+            this.q5 = this.oldJointValues[5];
             return 'ERROR';
         }
     }
 
     getJointPos(){
-        return [this.alpha1,this.alpha2,this.alpha3,this.rho1,this.rho2,this.rho3];
+        return [this.q0,this.q1,this.q2,this.q3,this.q4,this.q5];
     }
 
     getToolTransform(){
         return this.T[2];
+        // return this.axisT3.matrix; // may be it's better ?
     }
 
     create3Dmodel(){
@@ -130,14 +179,14 @@ var ConcentricTubeRobot = class {
         var Cte2 = this.E*this.I[1] + this.E*this.I[2];
         var Cte1 = this.E*this.I[0] + Cte2;
 
-        var num2cos = (this.E*this.I[1]*this.tubeKappa[1]*Math.cos(this.alpha2)+
-                       this.E*this.I[2]*this.tubeKappa[2]*Math.cos(this.alpha3));
-        var num2sin = (this.E*this.I[1]*this.tubeKappa[1]*Math.sin(this.alpha2)+
-                       this.E*this.I[2]*this.tubeKappa[2]*Math.sin(this.alpha3));
+        var num2cos = (this.E*this.I[1]*this.tubeKappa[1]*Math.cos(this.q1)+
+                       this.E*this.I[2]*this.tubeKappa[2]*Math.cos(this.q2));
+        var num2sin = (this.E*this.I[1]*this.tubeKappa[1]*Math.sin(this.q1)+
+                       this.E*this.I[2]*this.tubeKappa[2]*Math.sin(this.q2));
 
         // Deformed resultant curvature components
-        var ksi1   = (this.E*this.I[0]*this.tubeKappa[0]*Math.cos(this.alpha1) + num2cos) / Cte1;
-        var gamma1 = (this.E*this.I[0]*this.tubeKappa[0]*Math.sin(this.alpha1) + num2sin) / Cte1;
+        var ksi1   = (this.E*this.I[0]*this.tubeKappa[0]*Math.cos(this.q0) + num2cos) / Cte1;
+        var gamma1 = (this.E*this.I[0]*this.tubeKappa[0]*Math.sin(this.q0) + num2sin) / Cte1;
         var ksi2   = num2cos / Cte2;
         var gamma2 = num2sin / Cte2;
 
@@ -149,12 +198,12 @@ var ConcentricTubeRobot = class {
         // Phi, rotation angle around z
         var P1 = Math.atan2(gamma1,ksi1);
         var P2 = Math.atan2(gamma2,ksi2) - P1;
-        var P3 = this.alpha3 - P2 - P1;
+        var P3 = this.q2 - P2 - P1;
         this.P = [P1,P2,P3];
         // Section's final lengths due to the translation rho
-        var L1 = this.tubeLength[0] + this.rho1;        
-        var L2 = this.tubeLength[1] + this.rho2 - L1;        
-        var L3 = this.tubeLength[2] + this.rho3 - L2 - L1;        
+        var L1 = this.tubeLength[0] + this.q3;        
+        var L2 = this.tubeLength[1] + this.q4 - L1;        
+        var L3 = this.tubeLength[2] + this.q5 - L2 - L1;        
         this.L = [L1,L2,L3];
 
         //console.log(this.L);
@@ -181,15 +230,31 @@ var ConcentricTubeRobot = class {
         
         this.T[1].premultiply(this.T[0]); // end of tube 2
         this.T[2].premultiply(this.T[1]); // end of tube 3 - tool position
+
+        if (this.mesh !== undefined){
+            this.endEffectorPose.copy(this.T[2]);
+            this.endEffectorPose.premultiply(this.mesh.matrix);
+        }
     }
 
-    updateAll() {
+    setScale(scale){
+        this.scale = scale;
+    }
+    setPosition(position){
+        this.position = position;
+    }
+    setRotation(rotation){
+        this.rotation = rotation;
+    }
+
+    update() {
         this.updateRobotKinematics();
         this.update3Dmodel();
         this.updateAxisFrames();
 
-        //tranform m in px
-        this.mesh.scale.set(1000,1000,1000);
+        this.mesh.scale.set(this.scale,this.scale,this.scale);
+        this.mesh.position.set(this.position[0],this.position[1],this.position[2]);
+        this.mesh.rotation.set(this.rotation[0],this.rotation[1],this.rotation[2]);
         this.mesh.updateMatrix();
     }
 
@@ -198,25 +263,34 @@ var ConcentricTubeRobot = class {
         this.axisT2.visible = ! this.axisT2.visible;
         this.axisT3.visible = ! this.axisT3.visible;
     }
+    
     initJointFrames(){
+        this.axesMeshes = new THREE.Group();
         this.axisT1 = new THREE.AxisHelper(30/1000);
         this.axisT1.matrixAutoUpdate = false;
-        this.axisT1.visible = false;
-        this.mesh.add(this.axisT1);
+        this.axisT1.visible = true;
+        this.axesMeshes.add(this.axisT1);
         this.axisT2 = new THREE.AxisHelper(30/1000);
         this.axisT2.matrixAutoUpdate = false;
-        this.axisT2.visible = false;
-        this.mesh.add(this.axisT2);
+        this.axisT2.visible = true;
+        this.axesMeshes.add(this.axisT2);
         this.axisT3 = new THREE.AxisHelper(30/1000);
         this.axisT3.matrixAutoUpdate = false;
-        this.axisT3.visible = false;
-        this.mesh.add(this.axisT3);
+        this.axisT3.visible = true;
+        this.axesMeshes.add(this.axisT3);
+        this.mesh.add(this.axesMeshes);
     }
 
     updateAxisFrames(){
         this.axisT1.matrix.copy(this.T[0]);
         this.axisT2.matrix.copy(this.T[1]);
         this.axisT3.matrix.copy(this.T[2]);
+
+        if (this.axesVisible){
+            this.axesMeshes.visible = true;
+        }else{
+            this.axesMeshes.visible = false;
+        }
     }
 }
 

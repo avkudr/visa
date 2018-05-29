@@ -35,7 +35,7 @@ ArcCurve.prototype.getPoint = function ( t ) {
 var Tube = class {
 
     constructor(curvature = 0.005, length = 100.0, phi = 0.0, radius = 2, color = 0xff8000) {
-        console.log("Creating a tube");
+        //console.log("Creating a tube");
         this.curvature = curvature;
         this.length = length;
         this.radius = radius;

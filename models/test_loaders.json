@@ -1,0 +1,22 @@
+{
+    "objects":[
+        {
+            "file":"bear.stl",
+            "color": "#999999",
+            "position":[0,-20,0],
+            "rotation":[0,0,0.3]    
+        },
+        {
+            "file":"tree_sample.obj",
+            "scale":[5,5,5],
+            "position":[30,30,4],
+            "rotation":[1.68,0,0]  
+        },
+        {
+            "file":"wolf.dae",
+            "scale":[0.8,0.8,0.8],
+            "position":[60,-20,0],
+            "rotation":[0,0,0.7]             
+        }
+    ]
+}
