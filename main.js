@@ -18,7 +18,7 @@ global.appModelsDir = path.resolve(__dirname + '/models');
 // This process transmits all messages of such type to the server...
 
 function createWindow() { 
-    console.log('===== WELCOME TO CTR-SIMU =====');
+    console.log('===== WELCOME TO VISA: ViSP Simulation App =====');
     mainWindow = new BrowserWindow({
         width: 1400, 
         height: 600,

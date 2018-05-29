@@ -41,7 +41,7 @@ Scene3D.prototype.init = function(){
     this.mainCamera.up.set( 0, 0, 1 );
 	
     this.trackballControls = new TrackballControls(this.mainCamera, this.mainRenderer.domElement);
-    this.trackballControls.minDistance = 10;
+    this.trackballControls.minDistance = 0.01;
     this.trackballControls.maxDistance = 1000;
 
     this.scene.add(new THREE.AmbientLight(0xaaaaaa));
@@ -67,29 +67,21 @@ Scene3D.prototype.animate = function(){
     requestAnimationFrame( this.animate.bind(this) ); //loop animation
 
     //update relative positionning
-
-    for (let i=0; i < this.relatives.length; i++){
-        this.relatives[i].dest.origin = 
-            this.relatives[i].src[this.relatives[i].srcProperty];
+    for (let links of this.relatives){
+        links.dest.origin = links.src[links.srcProperty];
     }
 
-    for (let i=0; i < this.robots.length; i++){
-        this.robots[i].update();
+    for (let robot of this.robots){
+        robot.update();
     }
 
-    for (let i=0; i < this.cameras.length; i++){
-        this.cameras[i].update();
+    for (let camera of this.cameras){
+        camera.update();
+        camera.renderer.render(this.scene, camera.camera);
     }
 
-    //RELATIVE:
-    //copy matrix X to object.origin
     this.trackballControls.update();
-    this.mainRenderer.render(this.scene, this.mainCamera); 
-
-    for (let i=0; i < this.cameras.length; i++){
-        this.cameras[i].renderer.render(this.scene, this.cameras[i].camera);
-    }
-    
+    this.mainRenderer.render(this.scene, this.mainCamera);    
 }
 
 Scene3D.prototype.onWindowResize =  function(){
@@ -130,6 +122,33 @@ Scene3D.prototype.loadModel = function(path){
     let data = fs.readFileSync(path, 'utf8');
     data = JSON.parse(data);
 
+    if (data["global"] !== undefined){
+        if (data["global"]["camera"] !== undefined){
+            let params = data["global"]["camera"];
+            let fov  = (params.fov  === undefined) ?   45 : params.fov;
+            let near = (params.near === undefined) ?  0.1 : params.near;
+            let far  = (params.far  === undefined) ? 2000 : params.far;
+
+            let t = (params.position  === undefined) ? [400, -70, 241] : params.position;
+
+            this.mainCamera = new THREE.PerspectiveCamera(
+                fov,this.container.offsetWidth / this.container.offsetHeight, near, far);
+            
+            this.mainCamera.position.set(t[0], t[1], t[2]);
+            this.mainCamera.up.set( 0, 0, 1 );
+
+
+            this.trackballControls = new TrackballControls(this.mainCamera, this.mainRenderer.domElement);
+            this.trackballControls.minDistance = 0.01;
+            this.trackballControls.maxDistance = 1000;
+
+            if (params.lookAt === undefined){
+                this.trackballControls.target.set( 0, 0, 0 );
+            }else{
+                this.trackballControls.target.set(params.lookAt[0],params.lookAt[1],params.lookAt[2]);
+            }
+        }
+    }
     //load objects         
     if (data["objects"] !== undefined){
         this.nbObjectsToLoad = data["objects"].length;

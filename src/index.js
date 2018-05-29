@@ -72,29 +72,38 @@ function loadModelFile(filename){
     //wait until the model is fully loaded.
     mainController.init(scene3D);
 
+    // add gui
     while ( document.getElementById('gui') != undefined){ //in case if there are more than one
         document.getElementById('gui').remove();
     }
-
     document.getElementById('container').appendChild(mainController.gui.domElement);
-    for (let i = 0; i < scene3D.cameras.length; i++){
+
+    // add camera views
+    let cameraViewsDivs = document.getElementsByClassName('camera-div');
+    for (let div of cameraViewsDivs){
+        div.remove();
+    }
+
+    if (scene3D.cameras.length > 1) console.warn('TODO: You cannot have more than one external camera... yet');
+    for (let camera of scene3D.cameras){
         var elem = document.createElement('div');
+        elem.classList.add('camera-div');
+
         document.getElementById('container').appendChild(elem);
-        elem.style.width = scene3D.cameras[i].width;
-        elem.style.height = scene3D.cameras[i].height;
+        elem.style.width = camera.width;
+        elem.style.height = camera.height;
         elem.style.position = 'absolute';
         elem.style.bottom = '5px';
         elem.style.left = '5px';
-        elem.appendChild(scene3D.cameras[i].renderer.domElement);
+        elem.appendChild(camera.renderer.domElement);
 
-        scene3D.cameras[i].renderer.setPixelRatio(elem.devicePixelRatio);
+        camera.renderer.setPixelRatio(elem.devicePixelRatio);
     }
     document.getElementById('loading').style.visibility = 'hidden';
 
     console.warn('TODO: Global params in JSON');
-    console.warn('TODO: You cannot have more than one external camera... yet');
     console.warn('TODO: Parse relative-TO field...');
 }
 
 btnStartServerClicked();
-loadModelFile(appRootDir() + '/models/default.json');
+loadModelFile(appRootDir() + '/models/test_loaders.json');

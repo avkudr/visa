@@ -4,4 +4,4 @@ package-lock.json
 /models/_*.json
 /models/robots/FrankaPanda/
 /models/robots/FrankaPanda/*
-
+/**/*DS_Store
