@@ -106,4 +106,4 @@ function loadModelFile(filename){
 }
 
 btnStartServerClicked();
-loadModelFile(appRootDir() + '/models/test_loaders.json');
+loadModelFile(appRootDir() + '/models/test_kukaiiwa.json');

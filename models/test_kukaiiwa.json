@@ -1,0 +1,34 @@
+{
+    "global":{
+        "camera":{
+            "fov":60,
+            "near":0.01,
+            "far":2000,
+            "position":[250,-50,500],
+            "lookAt":[0,0,100]
+        }
+    },
+    "objects":[
+        {
+            "file":"bear.stl",
+            "color": "#999999",
+            "position":[-100,-20,0],
+            "rotation":[0,0,0.3]    
+        },
+        {
+            "file":"tree_sample.obj",
+            "scale":[5,5,5],
+            "position":[-130,30,4],
+            "rotation":[1.68,0,0]  
+        }
+    ],
+    "robots":[
+        {
+            "type": "KukaIIWA",
+            "scale": 0.2,
+            "jointValues": [0,0,0,0,0,0,0,0,0],
+            "position":[0,0,0],
+            "rotation":[0,0,0]
+        }
+    ]
+}

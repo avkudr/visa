@@ -199,6 +199,7 @@ Scene3D.prototype.loadModel = function(path){
                 console.warn('Only cameras may have relative positionning!');
             }
 
+            console.log(robot.mesh);
             this.scene.add(robot.mesh);
         }
     }
