@@ -1,9 +1,7 @@
-/*
-base class for all robots
-
-- change the name of the file to MyRobotClass
-
-*/
+/**
+ * @file Manages the configuration settings for the widget.
+ * @author Marie Bellot, Andrey Kudryavtsev 
+ */
 
 const THREE = require('three');
 const path  = require('path');
@@ -52,50 +50,44 @@ var KukaIIWA = class {
             path.resolve(__dirname,'c6.STL'),
             path.resolve(__dirname,'c7.STL')];
        
-        //this.meshes = new Array(this.STLFiles.length);
-        //this.meshMaterial = new Array(this.STLFiles.length);
-
-        this.robotAxes = new THREE.Group();
-        //this.axesHelper = new Array(this.STLFiles.length);
         this.axesVisible = false;
 
         this.updateKinematics();
         this.create3Dmodel();
+        this.updateMesh();
     }
-
-    wait(ms){
-        var start = new Date().getTime();
-        var end = start;
-        while(end < start + ms) {
-          end = new Date().getTime();
-       }
-     }
 
     create3Dmodel(){
         this.mesh = new THREE.Group();
-        this.mesh.matrixAutoUpdate = false;
-
         this.linksMeshes = new Array(this.robotModel.length);
+        this.mesh.matrixAutoUpdate = false;
 
         for (let i = 0; i < this.STLFiles.length; i++){
             let loader = new THREE.STLLoader();
             loader.load(this.STLFiles[i], function ( stlModel ) {
                 let material = new THREE.MeshStandardMaterial( { 
-                    color: 0xffffff,
-                    transparent: true,
-                    opacity: 0.4
+                    color: 0xff9933
                 } );
                 this.linksMeshes[i] = new THREE.Mesh( stlModel,  material );
                 this.linksMeshes[i].matrix.copy(this.T[i]);
-                
                 this.mesh.add( this.linksMeshes[i] );
-                                
-                // this.axesHelper[i] = new THREE.AxesHelper( 150 );
-                // this.axesHelper[i].matrix.copy( this.T[i]);
-                // this.axesHelper[i].matrixAutoUpdate = false;	
-                // this.axesHelper[i].updateMatrixWorld(true);
-                // this.robotAxes.add( this.axesHelper[i]);
             }.bind(this).bind(i));
+        }
+    }
+
+    updateMesh(){
+        this.axesMeshes = new THREE.Group();
+        this.linksAxes = new Array(this.robotModel.length);
+        this.axesMeshes.matrixAutoUpdate = false;
+
+        for (let i = 0; i < this.linksAxes.length; i++){
+            this.linksAxes[i] = new THREE.AxisHelper( 150 );
+            this.linksAxes[i].matrixAutoUpdate = false;
+            this.linksAxes[i].visible = false;
+            this.linksAxes[i].matrix.copy( this.T[i]);
+
+            this.axesMeshes.add(this.linksAxes[i]);
+            this.mesh.add( this.linksAxes[i] );
         }
     }
 
@@ -172,22 +164,16 @@ var KukaIIWA = class {
     }
 
     update3Dmodel(){
-        console.log(this.linksMeshes);
         for (let i = 0; i < this.linksMeshes.length; i++){
             if (this.linksMeshes[i] !== undefined){
                 let link = this.linksMeshes[i];
+                let axesLink = this.linksAxes[i];
+
                 link.matrixAutoUpdate = false;	
                 link.matrix.copy(this.T[i]);
                 link.updateMatrixWorld(true);
             }
-            // this.axesHelper[i].matrix.copy(this.T[i]);
-            // this.axesHelper[i].matrixAutoUpdate = false;	
-            // this.axesHelper[i].updateMatrixWorld(true);
         }
-    }
-
-    loadSTL(){
-
     }
 
     getToolTransform(){
@@ -204,21 +190,7 @@ var KukaIIWA = class {
         this.rotation = rotation;
     }
 
-    updateAxisFrames(){
-        // this.axisT1.matrix.copy(this.T[0]);
-        // this.axisT2.matrix.copy(this.T[1]);
-        // this.axisT3.matrix.copy(this.T[2]);
-
-        // if (this.axesVisible){
-        //     this.axesMeshes.visible = true;
-        // }else{
-        //     this.axesMeshes.visible = false;
-        // }
-    }
-
     update() {
-        // this.mesh.scale.set(this.scale,this.scale,this.scale);
-        // this.robotAxes.scale.set(this.scale,this.scale,this.scale);
         this.updateKinematics();
         this.update3Dmodel();
         this.updateAxisFrames();
@@ -229,8 +201,18 @@ var KukaIIWA = class {
         this.mesh.updateMatrix();
     }
 
-    toggleDisplayFrames(){
-        //toggle visibility of axes
+    updateAxisFrames(){
+        for(let i=0; i< this.linksAxes.length; i++){
+            if (this.linksAxes[i] !== undefined){
+                this.linksAxes[i].matrix.copy(this.T[i]);
+
+                if (this.axesVisible){
+                    this.linksAxes[i].visible = true;
+                }else{
+                    this.linksAxes[i].visible = false;
+                }
+            }
+        }
     }
 }
 

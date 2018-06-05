@@ -45,11 +45,15 @@ MainController.prototype.handleMsg = function(msg){
     // like SETROBOTIDX
     // like SETCAMERAIDX
 
-    response = this.handlers.robots[this.robotIdx].handle(msg);
-    if (response != 'unknown_command') return response;
+    if (this.handlers.robots.length > 0){
+        response = this.handlers.robots[this.robotIdx].handle(msg);
+        if (response != 'unknown_command') return response;
+    }
 
-    response = this.handlers.cameras[this.cameraIdx].handle(msg);
-    if (response != 'unknown_command') return response;
+    if (this.handlers.cameras.length > 0){
+        response = this.handlers.cameras[this.cameraIdx].handle(msg);
+        if (response != 'unknown_command') return response;
+    }
 
     return 'unknown_command';
 }
