@@ -237,6 +237,10 @@ var ConcentricTubeRobot = class {
         }
     }
 
+    get endeffector(){
+        return this.endEffectorPose;
+    }
+    
     setScale(scale){
         this.scale = scale;
     }

@@ -57,6 +57,13 @@ var KukaIIWA = class {
         this.updateMesh();
     }
 
+    get endeffector(){
+        let endEffectorPose = new THREE.Matrix4;
+        endEffectorPose.copy(this.T[this.robotModel.length-1]);
+        endEffectorPose.premultiply(this.mesh.matrix);
+        return endEffectorPose;
+    }
+
     create3Dmodel(){
         this.mesh = new THREE.Group();
         this.linksMeshes = new Array(this.robotModel.length);

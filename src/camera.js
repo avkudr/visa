@@ -161,7 +161,6 @@ Camera.prototype.getCalibMatrix = function(){
     K.elements[7] = this.height / 2;
     K.elements[8] = 1;
 
-    console.log(K);
     return K.elements.toString();
 }
 

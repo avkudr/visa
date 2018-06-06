@@ -30,5 +30,15 @@
             "position":[0,0,0],
             "rotation":[0,0,0]
         }
+    ],
+    "cameras":[
+        {
+            "fieldOfView": 30,
+            "width": 640,
+            "height": 480,
+            "relativeTo": "robots.0.endeffector",
+            "position":[0,0,0],
+            "rotation":[0,0,-1.57]
+        }
     ]
 }

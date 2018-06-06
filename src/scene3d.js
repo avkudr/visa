@@ -95,7 +95,6 @@ Scene3D.prototype.clearScene = function(){
     for (let i = this.scene.children.length-1; i >= 0; i--) {
         let elt = this.scene.children[i];
         if (elt instanceof THREE.Mesh){
-            console.log("removing a mesh from the scene");
             disposeHierarchy(elt, disposeNode);
             this.scene.remove(elt); 
         }
@@ -103,7 +102,6 @@ Scene3D.prototype.clearScene = function(){
             for (let j = elt.children.length-1; j >= 0; j--){           
                 let eltJ = elt.children[j];
                 if (eltJ instanceof THREE.Mesh){
-                    console.log("removing a mesh from the scene");
                     disposeHierarchy(eltJ, disposeNode);
                     elt.remove(eltJ); 
                 }
@@ -211,7 +209,6 @@ Scene3D.prototype.loadModel = function(path){
                 console.warn('Only cameras may have relative positionning!');
             }
 
-            console.log(robot.mesh);
             this.scene.add(robot.mesh);
         }
     }
@@ -240,10 +237,11 @@ Scene3D.prototype.loadModel = function(path){
 
             if (camInfo.hasOwnProperty('relativeTo')) {
                 // Updating objects with relative positionning;
+                let params = camInfo.relativeTo.split('.');
                 let relative = {};
                 relative.dest = this.cameras[i];
-                relative.src  = this.robots[0];
-                relative.srcProperty = "endEffectorPose";
+                relative.src  = this[params[0]][params[1]];
+                relative.srcProperty = params[2];
                 this.relatives.push(relative);
             }
 
