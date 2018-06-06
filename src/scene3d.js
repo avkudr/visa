@@ -149,7 +149,8 @@ Scene3D.prototype.loadModel = function(path){
             }
         }
     }
-    //load objects         
+    //load objects    
+    let promises = [];     
     if (data["objects"] !== undefined){
         this.nbObjectsToLoad = data["objects"].length;
         for (let i = 0; i < data["objects"].length; i++) {
@@ -160,15 +161,26 @@ Scene3D.prototype.loadModel = function(path){
             if (object.hasOwnProperty('relativeTo')) {
                 console.warn('Only cameras may have relative positionning!');
             }
+            
+            let promise;
             switch(extension){
-                case 'stl': this.loadSTL(object); break;
-                case 'obj': this.loadOBJ(object); break;
-                case 'dae': this.loadDAE(object); break;
+                case 'stl': promise = this.loadSTL(object); break;
+                case 'obj': promise = this.loadOBJ(object); break;
+                case 'dae': promise = this.loadDAE(object); break;
                 default:
                     alert("Unknown extension " + extension + " in : " + object.file + ". Currently supported are stl, obj/mtl, dae");
             }
+            promises.push(promise);
         }
+
+        Promise.all(promises).then(function() {
+            document.getElementById('loading').style.visibility = 'hidden';
+        }).catch(function() {
+            alert('All objects could not be loaded. Check your model file');
+        });
     }
+
+
 
     //load robots
     this.robots = [];
@@ -244,52 +256,61 @@ Scene3D.prototype.loadModel = function(path){
 }
 
 Scene3D.prototype.loadOBJ = function(object){
-    let loaderOBJ = new THREE.OBJLoader();
-    let filepath =  global.appRootDir() + "/models/objects/";
+    let self = this;
+    return new Promise(function(resolve, reject) {
+        let loaderOBJ = new THREE.OBJLoader();
+        let filepath =  global.appRootDir() + "/models/objects/";
 
-    var mtlLoader = new THREE.MTLLoader();
-    mtlLoader.setPath( filepath );
-    mtlLoader.setTexturePath( filepath + "textures/" );
+        var mtlLoader = new THREE.MTLLoader();
+        mtlLoader.setPath( filepath );
+        mtlLoader.setTexturePath( filepath + "textures/" );
 
-    let filename = object.file.split('.')[0];
+        let filename = object.file.split('.')[0];
 
-    mtlLoader.load( filename + '.mtl', function( materials ) {
-        materials.preload();
-        var objLoader = new THREE.OBJLoader();
-        objLoader.setMaterials( materials );
-        objLoader.setPath( filepath );
-        objLoader.load( filename + '.obj', function ( mesh ) {
-            this.setMeshObjectProperties(mesh,object);
-            this.scene.add( mesh );
-            this.nbObjectsToLoad--;
-        }.bind(this).bind(object));
-    }.bind(this).bind(object));
+        mtlLoader.load( filename + '.mtl', function( materials ) {
+            materials.preload();
+            var objLoader = new THREE.OBJLoader();
+            objLoader.setMaterials( materials );
+            objLoader.setPath( filepath );
+            objLoader.load( filename + '.obj', function ( mesh ) {
+                self.setMeshObjectProperties(mesh,object);
+                self.scene.add( mesh );
+                resolve('OK');
+            }.bind(object));
+        }.bind(object));
+    });
 }
 
 Scene3D.prototype.loadSTL = function(object){
-    let loaderSTL = new THREE.STLLoader();
-    let filepath = global.appRootDir() + "/models/objects/" + object.file;
+    let self = this;
+    return new Promise(function(resolve, reject) {
+        let loaderSTL = new THREE.STLLoader();
+        let filepath = global.appRootDir() + "/models/objects/" + object.file;
 
-    loaderSTL.load( filepath, function ( geometry ) {
-        let clr = (object.color == undefined) ? 0x1258c9 : object.color;
-        let material = new THREE.MeshPhongMaterial( { color: clr } );
-        let mesh = new THREE.Mesh( geometry, material );
-        this.setMeshObjectProperties(mesh,object);
-        this.scene.add( mesh );
-        this.nbObjectsToLoad--;
-    }.bind(this).bind(object));
+        loaderSTL.load( filepath, function ( geometry ) {
+            let clr = (object.color == undefined) ? 0x1258c9 : object.color;
+            let material = new THREE.MeshPhongMaterial( { color: clr } );
+            let mesh = new THREE.Mesh( geometry, material );
+            self.setMeshObjectProperties(mesh,object);
+            self.scene.add( mesh );
+            self.nbObjectsToLoad--;
+            resolve('OK');
+        }.bind(object));
+    }.bind(object));
 }
 
 Scene3D.prototype.loadDAE = function(object){
-    let loader = new THREE.ColladaLoader();
-    let filepath =  global.appRootDir() + "/models/objects/" + object.file;
-
-    loader.load( filepath , function ( collada ) {
-        let mesh = collada.scene;
-        this.setMeshObjectProperties(mesh,object);
-        this.scene.add( mesh );
-        this.nbObjectsToLoad--;
-    }.bind(this).bind(object));
+    let self = this;
+    return new Promise(function(resolve, reject) {
+        let loader = new THREE.ColladaLoader();
+        let filepath =  global.appRootDir() + "/models/objects/" + object.file;
+        loader.load( filepath , function ( collada ) {
+            let mesh = collada.scene;
+            self.setMeshObjectProperties(mesh,object);
+            self.scene.add( mesh );
+            resolve('OK');
+        }.bind(object));
+    }.bind(object));
 }
 
 Scene3D.prototype.setMeshObjectProperties = function(mesh,object){

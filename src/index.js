@@ -99,7 +99,6 @@ function loadModelFile(filename){
 
         camera.renderer.setPixelRatio(elem.devicePixelRatio);
     }
-    document.getElementById('loading').style.visibility = 'hidden';
 
     console.warn('TODO: Global params in JSON');
     console.warn('TODO: Parse relative-TO field...');

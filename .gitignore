@@ -5,3 +5,7 @@ package-lock.json
 /models/robots/FrankaPanda/
 /models/robots/FrankaPanda/*
 /**/*DS_Store
+_*.stl
+_*.dae
+_*.mtl
+_*.obj
