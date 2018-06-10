@@ -105,4 +105,4 @@ function loadModelFile(filename){
 }
 
 btnStartServerClicked();
-loadModelFile(appRootDir() + '/models/test_serialrobot.json');
+loadModelFile(appRootDir() + '/models/test_kukaiiwa.json');

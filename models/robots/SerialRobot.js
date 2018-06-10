@@ -106,26 +106,32 @@ class SerialRobot {
     }
 
     updateMesh(){
-        for (let i = 0; i < this.nbDOFs; i++){
-            if (this.linksMeshes[i] !== undefined){
-                let link = this.linksMeshes[i];
-                link.matrixAutoUpdate = false;	
-                link.matrix.copy(this.T[i]);
-                link.updateMatrixWorld(true);
+        if (this.mesh !== undefined){
+            for (let i = 0; i < this.nbDOFs; i++){
+                if (this.linksMeshes[i] !== undefined){
+                    let link = this.linksMeshes[i];
+                    link.matrixAutoUpdate = false;	
+                    link.matrix.copy(this.T[i]);
+                    link.updateMatrixWorld(true);
+                }
+            }
+
+            if ( this.baseMesh !== undefined){
+                this.baseMesh.matrix.copy(this.mesh.matrix);
             }
         }
-
-        this.baseMesh.matrix.copy(this.mesh.matrix);
     }
 
     createAxes(){
+        let axesSize = 1.2 * Math.max(...this.forwardKinematics[0]);
+        console.log(axesSize);
         this.axes = new THREE.Group();
         this.axes.matrixAutoUpdate = false;
         this.axesVisible = true;
 
         this.linksAxes = new Array(this.nbDOFs + 1);
         for (let i = 0; i < this.linksAxes.length; i++){
-            this.linksAxes[i] = new THREE.AxisHelper( 25 );
+            this.linksAxes[i] = new THREE.AxisHelper( axesSize );
             this.linksAxes[i].matrixAutoUpdate = false;
             this.linksAxes[i].visible = true;
             this.linksAxes[i].matrix.copy( this.T[i] );
