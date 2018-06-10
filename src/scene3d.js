@@ -176,6 +176,8 @@ Scene3D.prototype.loadModel = function(path){
         }).catch(function() {
             alert('All objects could not be loaded. Check your model file');
         });
+    }else{
+        document.getElementById('loading').style.visibility = 'hidden';
     }
 
 
