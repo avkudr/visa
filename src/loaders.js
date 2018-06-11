@@ -20,6 +20,7 @@ const Loaders = {
     
             mtlLoader.load( filename + '.mtl', function( materials ) {
                 materials.preload();
+                materials.side = THREE.DoubleSide;
                 var objLoader = new THREE.OBJLoader();
                 objLoader.setMaterials( materials );
                 objLoader.setPath( filepath );

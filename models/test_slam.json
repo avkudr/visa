@@ -10,10 +10,10 @@
     },
     "objects":[
         {
-            "file":"tube.obj",
-            "scale":[35,35,35],
-            "position":[0,0,20],
-            "rotation":[1.57,0,0]  
+            "file":"nose.obj",
+            "scale":[5,5,5],
+            "position":[5,0,50],
+            "rotation":[1.57,-1.57,0]  
         }
     ],
     "robots":[
