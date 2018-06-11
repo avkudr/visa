@@ -215,21 +215,38 @@ var ConcentricTubeRobot = class {
         this.T = new Array(3);
         for(var i = 0; i < this.T.length; i++){
             this.T[i] = new THREE.Matrix4;
-            this.T[i].set (            Math.cos(this.P[i])*Math.cos(this.K[i]*this.L[i]), 
-                 -Math.sin(this.P[i]), Math.cos(this.P[i])*Math.sin(this.K[i]*this.L[i]), 
-                         Math.cos(this.P[i])*(1-Math.cos(this.K[i]*this.L[i]))/this.K[i],
-                                       Math.sin(this.P[i])*Math.cos(this.K[i]*this.L[i]),
-                                                                     Math.cos(this.P[i]), 
-                                       Math.sin(this.P[i])*Math.sin(this.K[i]*this.L[i]), 
-                         Math.sin(this.P[i])*(1-Math.cos(this.K[i]*this.L[i]))/this.K[i],
-                                                          -Math.sin(this.K[i]*this.L[i]),  
-                                                                                       0,   
-                                                           Math.cos(this.K[i]*this.L[i]),   
-                                                 Math.sin(this.K[i]*this.L[i])/this.K[i],
-                                                                                       0,             
-                                                                                       0,
-                                                                                       0,
+            if (this.K[i] < 0.0001){
+                this.T[i].set( 
+                    Math.cos(this.P[i]),
+                   -Math.sin(this.P[i]),
+                                      0,
+                                      0,
+                    Math.sin(this.P[i]),
+                    Math.cos(this.P[i]),
+                                      0,
+                                      0,
+                                      0,
+                                      0,
+                                      1,
+                              this.L[i],
+                              0,0,0,1);
+            }else{
+                this.T[i].set (           Math.cos(this.P[i])*Math.cos(this.K[i]*this.L[i]), 
+                    -Math.sin(this.P[i]), Math.cos(this.P[i])*Math.sin(this.K[i]*this.L[i]), 
+                            Math.cos(this.P[i])*(1-Math.cos(this.K[i]*this.L[i]))/this.K[i],
+                                        Math.sin(this.P[i])*Math.cos(this.K[i]*this.L[i]),
+                                                                        Math.cos(this.P[i]), 
+                                        Math.sin(this.P[i])*Math.sin(this.K[i]*this.L[i]), 
+                            Math.sin(this.P[i])*(1-Math.cos(this.K[i]*this.L[i]))/this.K[i],
+                                                            -Math.sin(this.K[i]*this.L[i]),  
+                                                                                        0,   
+                                                            Math.cos(this.K[i]*this.L[i]),   
+                                                    Math.sin(this.K[i]*this.L[i])/this.K[i],
+                                                                                        0,             
+                                                                                        0,
+                                                                                        0,
                                                                                        1);
+            }
         } 
         
         this.T[1].premultiply(this.T[0]); // end of tube 2
