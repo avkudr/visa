@@ -9,6 +9,7 @@ const Tube  = require('./tube.js').Tube;
 
 var ConcentricTubeRobot = class {
     constructor(tubeLengths,tubeCurvatures) {
+        this.nbDOFs = 6;
         //default joint values:
         this.q0 = 0; //radians
         this.q1 = 0;
@@ -35,6 +36,9 @@ var ConcentricTubeRobot = class {
         this.axesVisible = false;
 
         this.initFabricationParams(tubeLengths,tubeCurvatures);
+    }
+
+    async init(){
         this.updateRobotKinematics();
         this.create3Dmodel(); //create3Dmodel
         this.initJointFrames();

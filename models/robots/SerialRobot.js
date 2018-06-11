@@ -35,9 +35,16 @@ class SerialRobot {
         this.rotation = [0,0,0];
 
         this.T = new Array(this.nbDOFs); //transformation matrices for all joints
+
+        this.isInitDone = false;
+    }
+
+    async init(){
         this.updateKinematics();
-        this.createMesh();
+        let dummy = await this.createMesh();
         this.createAxes();
+        this.isInitDone = true;
+        return dummy;
     }
 
     updateKinematics(){
@@ -76,7 +83,7 @@ class SerialRobot {
         } 
     }
 
-    createMesh(){
+    async createMesh(){
         this.mesh = new THREE.Group();
         this.mesh.matrixAutoUpdate = false;
 
@@ -124,7 +131,6 @@ class SerialRobot {
 
     createAxes(){
         let axesSize = 1.2 * Math.max(...this.forwardKinematics[0]);
-        console.log(axesSize);
         this.axes = new THREE.Group();
         this.axes.matrixAutoUpdate = false;
         this.axesVisible = true;
@@ -210,14 +216,16 @@ class SerialRobot {
     }
 
     update() {
-        this.updateKinematics();
-        this.updateMesh();
-        this.updateAxes();
+        if (this.isInitDone){
+            this.updateKinematics();
+            this.updateMesh();
+            this.updateAxes();
 
-        this.mesh.scale.set(this.scale,this.scale,this.scale);
-        this.mesh.position.set(this.position[0],this.position[1],this.position[2]);
-        this.mesh.rotation.set(this.rotation[0],this.rotation[1],this.rotation[2]);
-        this.mesh.updateMatrix();
+            this.mesh.scale.set(this.scale,this.scale,this.scale);
+            this.mesh.position.set(this.position[0],this.position[1],this.position[2]);
+            this.mesh.rotation.set(this.rotation[0],this.rotation[1],this.rotation[2]);
+            this.mesh.updateMatrix();
+        }
     }
 
     toggleDisplayFrames(){

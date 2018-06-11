@@ -29,7 +29,7 @@ var Camera = function () {
     this.width = 240;
     this.fieldOfView = 30;
     this.near = 0.01;
-    this.far = 200;
+    this.far = 500;
 
     this.cameraHelper = {};
     this.renderer = {};

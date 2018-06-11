@@ -67,42 +67,41 @@ function loadModelFile(filename){
 
     modelFileName = filename;
     //console.log('Loading the model: ' + modelFileName);
-    scene3D.loadModel(filename);
-    
-    //wait until the model is fully loaded.
-    mainController.init(scene3D);
+    scene3D.loadModel(filename).then(()=>{
+        document.getElementById('loading').style.visibility = 'hidden';
 
-    // add gui
-    while ( document.getElementById('gui') != undefined){ //in case if there are more than one
-        document.getElementById('gui').remove();
-    }
-    document.getElementById('container').appendChild(mainController.gui.domElement);
+        //wait until the model is fully loaded.
+        mainController.init(scene3D);
 
-    // add camera views
-    let cameraViewsDivs = document.getElementsByClassName('camera-div');
-    for (let div of cameraViewsDivs){
-        div.remove();
-    }
+        // add gui
+        while ( document.getElementById('gui') != undefined){ //in case if there are more than one
+            document.getElementById('gui').remove();
+        }
+        document.getElementById('container').appendChild(mainController.gui.domElement);
 
-    if (scene3D.cameras.length > 1) console.warn('TODO: You cannot have more than one external camera... yet');
-    for (let camera of scene3D.cameras){
-        var elem = document.createElement('div');
-        elem.classList.add('camera-div');
+        // add camera views
+        let cameraViewsDivs = document.getElementsByClassName('camera-div');
+        for (let div of cameraViewsDivs){
+            div.remove();
+        }
 
-        document.getElementById('container').appendChild(elem);
-        elem.style.width = camera.width;
-        elem.style.height = camera.height;
-        elem.style.position = 'absolute';
-        elem.style.bottom = '5px';
-        elem.style.left = '5px';
-        elem.appendChild(camera.renderer.domElement);
+        if (scene3D.cameras.length > 1) console.warn('TODO: You cannot have more than one external camera... yet');
+        for (let camera of scene3D.cameras){
+            var elem = document.createElement('div');
+            elem.classList.add('camera-div');
 
-        camera.renderer.setPixelRatio(elem.devicePixelRatio);
-    }
+            document.getElementById('container').appendChild(elem);
+            elem.style.width = camera.width;
+            elem.style.height = camera.height;
+            elem.style.position = 'absolute';
+            elem.style.bottom = '5px';
+            elem.style.left = '5px';
+            elem.appendChild(camera.renderer.domElement);
 
-    console.warn('TODO: Global params in JSON');
-    console.warn('TODO: Parse relative-TO field...');
+            camera.renderer.setPixelRatio(elem.devicePixelRatio);
+        }
+    });   
 }
 
 btnStartServerClicked();
-loadModelFile(appRootDir() + '/models/test_kukaiiwa.json');
+loadModelFile(appRootDir() + '/models/test_slam.json');

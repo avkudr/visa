@@ -6,6 +6,7 @@
 const THREE = require('three');
 const path  = require('path');
 
+const {Loaders} = require(global.appRootDir() + '/src/loaders.js');
 const {SerialRobot} = require(path.resolve(__dirname,"./../SerialRobot.js"));
 
 class KukaIIWA extends SerialRobot{
@@ -24,7 +25,7 @@ class KukaIIWA extends SerialRobot{
         this.jointTypes = ['R','R','R','R','R','R','R'];
     }
 
-    createMesh(){
+    async createMesh(){
         let STLBase = path.resolve(__dirname,'base.STL');
         let STLLinks = [
             path.resolve(__dirname,'c1.STL'),
@@ -37,30 +38,16 @@ class KukaIIWA extends SerialRobot{
 
         this.mesh = new THREE.Group();
         this.mesh.matrixAutoUpdate = false;
-
-        let loader = new THREE.STLLoader();
-        
-        this.baseMesh = new THREE.Group(); //
-        loader.load(STLBase, function ( stlModel ) {
-            let material = new THREE.MeshStandardMaterial( { 
-                color: 0xff9933
-            } );
-            this.baseMesh = new THREE.Mesh( stlModel,  material );
-            this.baseMesh.matrix.copy(this.mesh.matrix);
-            this.mesh.add( this.baseMesh );
-        }.bind(this));
+       
+        this.baseMesh = await Loaders.stl(STLBase, 0xff9933);
+        this.baseMesh.matrix.copy(this.mesh.matrix);
+        this.mesh.add( this.baseMesh );
 
         this.linksMeshes = new Array(this.nbDOFs);
         for (let i = 0; i < STLLinks.length; i++){
-            let loader = new THREE.STLLoader();
-            loader.load(STLLinks[i], function ( stlModel ) {
-                let material = new THREE.MeshStandardMaterial( { 
-                    color: 0xff9933
-                } );
-                this.linksMeshes[i] = new THREE.Mesh( stlModel,  material );
-                this.linksMeshes[i].matrix.copy(this.T[i]);
-                this.mesh.add( this.linksMeshes[i] );
-            }.bind(this).bind(i));
+            this.linksMeshes[i] = await Loaders.stl( STLLinks[i], 0xff9933 );
+            this.linksMeshes[i].matrix.copy(this.T[i]);
+            this.mesh.add( this.linksMeshes[i] );
         }
     }
 
