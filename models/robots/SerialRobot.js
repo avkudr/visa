@@ -26,7 +26,7 @@ class SerialRobot {
         this.jointLimits = new Array(this.nbDOFs);
         for (let i = 0; i < this.nbDOFs; i++){
             this['q'+ i] = 0;
-            this.jointTypes[i] = 'T';
+            this.jointTypes[i] = 'P';
             this.jointLimits[i] = [-20, 20];
         }
 
@@ -60,7 +60,7 @@ class SerialRobot {
             let jointR = 0;
             if (i < this.nbDOFs){
                 if (this.jointTypes[i] == 'R') jointR = this['q'+i];
-                if (this.jointTypes[i] == 'T') jointT = this['q'+i];
+                if (this.jointTypes[i] == 'P') jointT = this['q'+i];
             }
 
             Ry.makeRotationY(this.forwardKinematics[i][1]);

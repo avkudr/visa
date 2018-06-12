@@ -68,13 +68,13 @@ Scene3D.prototype.animate = function(){
         links.dest.origin = links.src[links.srcProperty];
     }
 
-    for (let robot of this.robots){
-        robot.update();
-    }
-
     for (let camera of this.cameras){
         camera.update();
         camera.renderer.render(this.scene, camera.camera);
+    }
+
+    for (let robot of this.robots){
+        robot.update();
     }
 
     this.trackballControls.update();

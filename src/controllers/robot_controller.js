@@ -33,13 +33,13 @@ RobotController.prototype.handle = function(arg){
             if ( args.length != this.robot.getNbDOFs()) return 'ERROR:' + cmd + ': wrong number of arguments';
             let qStart = this.robot.getJointPos();
             let qEnd = qStart.map(function (num, idx) { return num + args[idx]; }); 
-            
+
             this.robotMove(qStart,qEnd);
             return 'OK';
         }
         case 'HOMING':{
             let qStart = this.robot.getJointPos();
-            let jointPosZeros = Array.apply(null, Array(robot.getNbDOFs())).map(Number.prototype.valueOf,0);
+            let jointPosZeros = Array.apply(null, Array(this.robot.getNbDOFs())).map(Number.prototype.valueOf,0);
             this.robotMove(qStart,jointPosZeros);
             return 'OK';
         }
@@ -101,6 +101,7 @@ RobotController.prototype.robotMove = function(qStart,qEnd){
 
     // how much iterations is needed to achieve qEnd with given samlpling time and maximal velocity
     let qIterations = new Array(this.robot.getNbDOFs());
+    qCurrent = new Array(this.robot.getNbDOFs());
     for (let i = 0; i < this.robot.getNbDOFs(); i++){
         let jointMaxSpeed = (this.robot.jointTypes[i] == 'P') ? jointMaxSpeedT : jointMaxSpeedR;
         qIterations[i] = qDiff[i] / jointMaxSpeed / samplingTime ;
@@ -114,7 +115,10 @@ RobotController.prototype.robotMove = function(qStart,qEnd){
     let factor = nbIter / nbIterFloat;
     qIterations = qIterations.map(function (num, idx) { return qIterations[idx] * factor; });
 
-    let jointVelMax = [jointMaxSpeedR,jointMaxSpeedR,jointMaxSpeedR,jointMaxSpeedT,jointMaxSpeedT,jointMaxSpeedT];
+    let jointVelMax = new Array(this.robot.getNbDOFs());
+    for (let i = 0; i < jointVelMax.length; i++){
+        jointVelMax[i] = (this.robot.jointTypes[i] == 'R') ? jointMaxSpeedR : jointMaxSpeedT;
+    }
     jointVelMax = jointVelMax.map(function (num, idx) { return jointVelMax[idx] / factor; });
     
     //calculate velocities to synchronize all joints
@@ -125,6 +129,7 @@ RobotController.prototype.robotMove = function(qStart,qEnd){
 
     // thus, all joint will move for nbIter iterations with jointVel velocities
     console.log("Iterations needed: " + nbIter);
+    console.log(jointVel);
     this.robotMoveVel(jointVel,nbIter);
 } 
 
