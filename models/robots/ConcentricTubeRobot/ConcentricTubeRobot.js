@@ -60,18 +60,18 @@ var ConcentricTubeRobot = class {
     }
 
     initFabricationParams(tubeLengths,tubeCurvatures){
-        this.E = 40e9; // Modulus of elasticity (Young's modulus)
+        this.E = 80e9; // Modulus of elasticity (Young's modulus)
         
         // Tubes' radii
         this.radiiInt = [ // internal   
-            (2.668e-3)/2,
-            (1.473e-3)/2,
-            (0.96e-3)/2
+            (1.100e-3)/2,
+            (0.770e-3)/2,
+            (0.414e-3)/2
         ];
         this.radiiExt = [ // external in m 
-            (3.112e-3)/2,
-            (2.032e-3)/2,
-            (1.32e-3)/2
+            (1.600e-3)/2,
+            (1.010e-3)/2,
+            (0.640e-3)/2
         ];
 
         // Tubes' moments of inertia

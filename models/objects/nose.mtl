@@ -1,23 +1,23 @@
 # Blender MTL File: 'nose1.blend'
-# Material Count: 4
+# Material Count: 2
 
-newmtl Face
+newmtl Face.001
 Ns 1.960784
 Ka 1.000000 1.000000 1.000000
-Kd 0.470400 0.313345 0.271073
+Kd 0.328752 0.197159 0.127802
 Ks 0.358840 0.220089 0.220089
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
-illum 0
+illum 2
 
 newmtl Material.003
-Ns 1.078431
+Ns 10.0
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
-illum 0
-map_Kd TexturesCom_Meat0016_seamless_S.jpg
+illum 2
+map_Kd nose.jpg

@@ -12,18 +12,18 @@
         {
             "file":"nose.obj",
             "scale":[5,5,5],
-            "position":[5,0,50],
+            "position":[5,0,20],
             "rotation":[1.57,-1.57,0]  
         }
     ],
     "robots":[
         {
             "type": "ConcentricTubeRobot",
-            "jointValues": [0,0,0,-0.023,-0.120,-0.160],
+            "jointValues": [0,0,0,-0.023,-0.137,-0.160],
             "position":[0,0,0],
             "rotation":[0,0,0],
             "scale": 500,
-            "tubeCurvatures": [0.41,7.2,9.76],
+            "tubeCurvatures": [-5.415648688476,48.033717802220,0],
             "tubeLengths": [40e-3,155e-3,200e-3]
         }
     ],
