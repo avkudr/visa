@@ -11,19 +11,19 @@
     "objects":[
         {
             "file":"nose.obj",
-            "scale":[2,2,2],
-            "position":[0.5,0,20],
+            "scale":[4,4,4],
+            "position":[1,-0.3,20],
             "rotation":[1.57,-1.57,0]  
         }
     ],
     "robots":[
         {
             "type": "ConcentricTubeRobot",
-            "jointValues": [0,0,0,-0.023,-0.137,-0.1635],
+            "jointValues": [0,0,0,-0.023,-0.1375,-0.1635],
             "position":[0,0,0],
             "rotation":[0,0,0],
             "scale": 500,
-            "tubeCurvatures": [-6.503325,48.033717802220,0],
+            "tubeCurvatures": [-6.503325,70.033717802220,0],
             "tubeLengths": [40e-3,155e-3,200e-3]
         }
     ],
