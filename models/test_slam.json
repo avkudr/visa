@@ -29,7 +29,7 @@
     ],
     "cameras":[
         {
-            "fieldOfView": 60,
+            "fieldOfView": 45,
             "width": 640,
             "height": 480,
             "relativeTo": "robots.0.endeffector",

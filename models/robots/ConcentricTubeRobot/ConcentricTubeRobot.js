@@ -98,7 +98,7 @@ var ConcentricTubeRobot = class {
         var L2 = this.tubeLength[1] + q[4] - L1;        
         var L3 = this.tubeLength[2] + q[5] - L2 - L1;        
 
-        if (L1 >= 0 && L2 >= 0 && L3 >= 0){
+        //if (L1 >= 0 && L2 >= 0 && L3 >= 0){
             this.q3                = q[3];
             this.q4                = q[4];
             this.q5                = q[5];
@@ -106,12 +106,12 @@ var ConcentricTubeRobot = class {
             this.oldJointValues[4] = q[4];
             this.oldJointValues[5] = q[5];
             return 'OK';
-        } else {
-            this.q3 = this.oldJointValues[3];
-            this.q4 = this.oldJointValues[4];
-            this.q5 = this.oldJointValues[5];
-            return 'ERROR';
-        }
+        //} else {
+        //    this.q3 = this.oldJointValues[3];
+        //    this.q4 = this.oldJointValues[4];
+        //    this.q5 = this.oldJointValues[5];
+        //    return 'ERROR';
+        //}
     }
 
     getJointPos(){
