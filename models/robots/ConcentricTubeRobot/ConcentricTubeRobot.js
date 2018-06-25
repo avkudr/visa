@@ -94,24 +94,33 @@ var ConcentricTubeRobot = class {
         this.oldJointValues[1] = q[1];
         this.oldJointValues[2] = q[2];
 
-        var L1 = this.tubeLength[0] + q[3];        
-        var L2 = this.tubeLength[1] + q[4] - L1;        
-        var L3 = this.tubeLength[2] + q[5] - L2 - L1;        
+        var L1 = this.tubeLength[0] + q[3]; 
+        if (L1 < 0){
+            q[3] += -L1;  
+            this.oldJointValues[3] = q[3];    
+            L1 = this.tubeLength[0] + q[3];  
+        } 
 
-        //if (L1 >= 0 && L2 >= 0 && L3 >= 0){
-            this.q3                = q[3];
-            this.q4                = q[4];
-            this.q5                = q[5];
-            this.oldJointValues[3] = q[3];
-            this.oldJointValues[4] = q[4];
-            this.oldJointValues[5] = q[5];
-            return 'OK';
-        //} else {
-        //    this.q3 = this.oldJointValues[3];
-        //    this.q4 = this.oldJointValues[4];
-        //    this.q5 = this.oldJointValues[5];
-        //    return 'ERROR';
-        //}
+        var L2 = this.tubeLength[1] + q[4] - L1;        
+        if (L2 < 0){
+            q[4] += -L2;  
+            this.oldJointValues[4] = q[4];  
+            L2 = this.tubeLength[1] + q[4] - L1;    
+        }
+
+
+        var L3 = this.tubeLength[2] + q[5] - L2 - L1;       
+        if (L3 < 0){
+            q[5] += -L3;  
+            this.oldJointValues[5] = q[5];     
+            L3 = this.tubeLength[2] + q[5] - L2 - L1;
+        }
+        console.log(L3);  
+        console.log(q[5]);
+        
+        this.q3 = q[3];
+        this.q4 = q[4];
+        this.q5 = q[5];
     }
 
     getJointPos(){
