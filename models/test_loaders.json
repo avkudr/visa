@@ -16,6 +16,11 @@
             "rotation":[0,0,0.3]    
         },
         {
+            "file":"target_4dots.obj",
+            "position":[65,35,0],
+            "scale":[4,4,4]    
+        },
+        {
             "file":"tree_sample.obj",
             "scale":[5,5,5],
             "position":[30,30,4],
