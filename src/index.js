@@ -96,6 +96,7 @@ function loadModelFile(filename){
             elem.style.position = 'absolute';
             elem.style.bottom = '5px';
             elem.style.left = '5px';
+            elem.style.zIndex = 10;
             elem.appendChild(camera.renderer.domElement);
 
             camera.renderer.setPixelRatio(elem.devicePixelRatio);

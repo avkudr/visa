@@ -64,6 +64,7 @@ MainController.prototype.createGUI = function(){
     this.gui.domElement.style.position = 'absolute';
     this.gui.domElement.style.top = '2px';
     this.gui.domElement.style.right = '2px';
+    this.gui.domElement.style.zIndex = 20;
 
     let nbRobots = this.scene3d.robots.length;
     for (let i = 0; i < nbRobots; i++){
