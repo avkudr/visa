@@ -115,8 +115,6 @@ var ConcentricTubeRobot = class {
             this.oldJointValues[5] = q[5];     
             L3 = this.tubeLength[2] + q[5] - L2 - L1;
         }
-        console.log(L3);  
-        console.log(q[5]);
         
         this.q3 = q[3];
         this.q4 = q[4];
