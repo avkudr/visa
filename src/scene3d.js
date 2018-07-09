@@ -7,7 +7,17 @@ const {Loaders} = require('./loaders.js');
 
 var Scene3D = function(container){
     this.container = container;
+    // add main renderer window
+    this.mainRenderer = new THREE.WebGLRenderer({alpha: true, antialias:true });
+    this.mainRenderer.setPixelRatio(window.devicePixelRatio);
+    this.mainRenderer.setSize(window.innerWidth, window.innerHeight);
+    this.mainRenderer.autoClear = false;
+    this.mainRenderer.setClearColor(0x000000, 0.0);
+    this.mainRenderer.setViewport( 0, 0, this.container.offsetWidth, this.container.offsetHeight);
+    this.container.appendChild(this.mainRenderer.domElement);
     this.init();
+
+    window.addEventListener( 'resize', this.onWindowResize.bind(this), false );
 
     this.robots = [];
     this.cameras = [];
@@ -17,15 +27,6 @@ var Scene3D = function(container){
 }
 
 Scene3D.prototype.init = function(){
-
-    // add main renderer window
-    this.mainRenderer = new THREE.WebGLRenderer({alpha: true, antialias:true });
-    this.mainRenderer.setPixelRatio(window.devicePixelRatio);
-    this.mainRenderer.setSize(window.innerWidth, window.innerHeight);
-    this.mainRenderer.autoClear = false;
-    this.mainRenderer.setClearColor(0x000000, 0.0);
-    this.mainRenderer.setViewport( 0, 0, this.container.offsetWidth, this.container.offsetHeight);
-    this.container.appendChild(this.mainRenderer.domElement);
 
     // general configuration of the scene
     this.scene = new THREE.Scene();
@@ -56,8 +57,6 @@ Scene3D.prototype.init = function(){
     var helper = new THREE.GridHelper(200, 40);
     helper.rotation.x = Math.PI / 2;
     this.scene.add(helper);
-
-    window.addEventListener( 'resize', this.onWindowResize.bind(this), false );
 }
 
 Scene3D.prototype.animate = function(){
@@ -89,13 +88,14 @@ Scene3D.prototype.onWindowResize =  function(){
 
 Scene3D.prototype.clearScene = function(){
     //console.log(this.scene);
+    this.relatives = [];
+
     for (let i = this.scene.children.length-1; i >= 0; i--) {
         let elt = this.scene.children[i];
         if (elt instanceof THREE.Mesh){
             disposeHierarchy(elt, disposeNode);
             this.scene.remove(elt); 
-        }
-        if (elt instanceof THREE.Group){
+        } else if (elt instanceof THREE.Group){
             for (let j = elt.children.length-1; j >= 0; j--){           
                 let eltJ = elt.children[j];
                 if (eltJ instanceof THREE.Mesh){
@@ -104,9 +104,12 @@ Scene3D.prototype.clearScene = function(){
                 }
             }
             this.scene.remove(elt); 
+        } else {
+            this.scene.remove(elt); 
         }
     }    
     this.mainRenderer.renderLists.dispose();
+    this.init();
     //console.log(this.scene);
 }
 
