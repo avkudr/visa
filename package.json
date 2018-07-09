@@ -4,7 +4,8 @@
   "description": "ViSP Simulation App",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "test": "mocha || true"
   },
   "author": "Andrey V. Kudryavtsev",
   "license": "GPL-3.0",
@@ -14,5 +15,9 @@
     "npm": "^6.1.0",
     "three": "^0.86.0",
     "three-trackballcontrols": "0.0.7"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^5.2.0"
   }
 }
