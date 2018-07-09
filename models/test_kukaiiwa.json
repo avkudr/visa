@@ -4,30 +4,23 @@
             "fov":60,
             "near":0.01,
             "far":2000,
-            "position":[250,-50,500],
+            "position":[250,300,100],
             "lookAt":[0,0,100]
         }
     },
     "objects":[
         {
-            "file":"bear.stl",
-            "color": "#999999",
-            "position":[-100,-20,0],
-            "rotation":[0,0,0.3]    
-        },
-        {
-            "file":"tree_sample.obj",
-            "scale":[5,5,5],
-            "position":[-130,30,4],
-            "rotation":[1.68,0,0]  
+            "file":"target_4dots.obj",
+            "position":[65,35,0],
+            "scale":[4,4,4]    
         }
     ],
     "robots":[
         {
             "type": "KukaIIWA",
             "scale": 0.2,
-            "jointValues": [0,0,0,0,0,0,0],
-            "position":[0,0,0],
+            "jointValues": [0.44,0.33,0,-1.38,0.062,1.11,0.58],
+            "position":[-65,-35,0],
             "rotation":[0,0,0]
         }
     ],
