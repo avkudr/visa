@@ -120,11 +120,8 @@ Camera.prototype.update = function () {
 }
 
 Camera.prototype.toggleImageVisibility = function () {
-    if (this.renderer.domElement.style.visibility == 'hidden') {
-        this.renderer.domElement.style.visibility = 'visible';
-    } else {
-        this.renderer.domElement.style.visibility = 'hidden';
-    };
+    let cameraDivZIndex = document.getElementsByClassName('camera-div')[0];
+    cameraDivZIndex.style.zIndex = (cameraDivZIndex.style.zIndex > 0) ? -10 : 10;
 }
 
 Camera.prototype.getImage = function () {
