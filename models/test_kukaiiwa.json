@@ -27,8 +27,8 @@
     "cameras":[
         {
             "fieldOfView": 30,
-            "width": 640,
-            "height": 480,
+            "width": 320,
+            "height": 240,
             "relativeTo": "robots.0.endeffector",
             "position":[0,0,0],
             "rotation":[0,0,-1.57]
