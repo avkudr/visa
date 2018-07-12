@@ -19,19 +19,9 @@
         {
             "type": "Viper650",
             "scale": 0.1,
-            "jointValues": [1.57,0,0],
+            "jointValues": [0,-1.57,3.14,0,0,0],
             "position":[0,0,0],
             "rotation":[0,0,0]
-        }
-    ],
-    "cameras":[
-        {
-            "fieldOfView": 30,
-            "width": 640,
-            "height": 480,
-            "relativeTo": "robots.0.endeffector",
-            "position":[0,0,0],
-            "rotation":[0,0,-1.57]
         }
     ]
 }

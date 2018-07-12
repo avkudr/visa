@@ -74,7 +74,7 @@ Scene3D.prototype.animate = function(){
 
     for (let robot of this.robots){
         robot.update();
-        console.log(robot);
+        //console.log(robot);
     }
 
     this.trackballControls.update();

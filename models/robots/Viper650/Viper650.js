@@ -11,11 +11,15 @@ const {SerialRobot} = require(path.resolve(__dirname,"./../SerialRobot.js"));
 
 class Viper650 extends SerialRobot{
     constructor(){
-        // sigma, alpha, a, theta, d
+        // sigma, tx, ty, tz, rx, ry, rz -Math.PI/2
         super([
-            [  0,          0,  			0, 		         0,       203.0],	//base -> c1
-            [  0, -Math.PI/2,  	     75.0, 		         0,       335.0-203.0],	//base -> c1
-            [  0,          0,  	    270.0, 		         0,           0]
+            [  0, 0,0,203.0,        0,0,0],	//base -> c1
+            [  0,75,0,335.0-203.0,  -Math.PI/2,0,0],	//base -> c1
+            [  0,270,0,0,      0,0,-Math.PI/2],
+            [  0,108,-90,0,      0, Math.PI/2,0],
+            [  0,0,0,295-108,      0,-Math.PI/2,0],
+            [  0,80,0,0,      0,Math.PI/2,0],
+            [  0,0,0,101.6,      0,0,0]
         ]);
 
         this.jointTypes = ['R','R','R','R','R','R'];
@@ -25,7 +29,8 @@ class Viper650 extends SerialRobot{
         let STLBase = path.resolve(__dirname,'base.stl');
         let STLLinks = [
             path.resolve(__dirname,'c1.stl'),
-            path.resolve(__dirname,'c2.stl')];
+            path.resolve(__dirname,'c2.stl'),
+            path.resolve(__dirname,'c3.stl')];
 
         this.mesh = new THREE.Group();
         this.mesh.matrixAutoUpdate = false;

@@ -53,6 +53,7 @@ class SerialRobot {
         for (var i = 0; i < this.nbDOFs + 1; i++){
 
             var Tx = new THREE.Matrix4;
+            var Ty = new THREE.Matrix4;
             var Tz = new THREE.Matrix4;
             var Rx = new THREE.Matrix4;
             var Ry = new THREE.Matrix4;
@@ -80,19 +81,37 @@ class SerialRobot {
                 this.T[i].multiply(Rz);
                 this.T[i].multiply(Tz);
             }else{
-                let alphai = this.forwardKinematics[i][1];
-                let ai = this.forwardKinematics[i][2];
-                let thetai = this.forwardKinematics[i][3];
-                let di = this.forwardKinematics[i][4] + jointT;
+                let tx = this.forwardKinematics[i][1];
+                let ty = this.forwardKinematics[i][2];
+                let tz = this.forwardKinematics[i][3] + jointT;
+                let rx = this.forwardKinematics[i][4];
+                let ry = this.forwardKinematics[i][5];
+                let rz = this.forwardKinematics[i][6] + jointR;
                 
-                this.T[i].set ( Math.cos(thetai), -Math.sin(thetai)*Math.cos(alphai), Math.sin(thetai)*Math.sin(alphai), ai*Math.cos(thetai),
-                                Math.sin(thetai),  Math.cos(thetai)*Math.cos(alphai),-Math.cos(thetai)*Math.sin(alphai), ai*Math.sin(thetai),
-                                               0,                   Math.sin(alphai),                  Math.cos(alphai),                  di,
-                                               0,                                  0,                                 0,                   1);
+                // this.T[i].set ( Math.cos(thetai), -Math.sin(thetai)*Math.cos(alphai), Math.sin(thetai)*Math.sin(alphai), ai*Math.cos(thetai),
+                //                 Math.sin(thetai),  Math.cos(thetai)*Math.cos(alphai),-Math.cos(thetai)*Math.sin(alphai), ai*Math.sin(thetai),
+                //                                0,                   Math.sin(alphai),                  Math.cos(alphai),                  di,
+                //                                0,                                  0,                                 0,                   1);
 
-                var Rz = new THREE.Matrix4;
-                Rz.makeRotationZ(jointR );
+                Rx.makeRotationX(rx);
+                Ry.makeRotationY(ry);
+                Rz.makeRotationZ(rz);
+                Tx.makeTranslation(tx, 0, 0);
+                Ty.makeTranslation( 0,ty, 0);
+                Tz.makeTranslation( 0, 0,tz);
+
+                
+                this.T[i].multiply(Tx);
+                this.T[i].multiply(Ty);
+                this.T[i].multiply(Tz);
+                this.T[i].multiply(Rx);
+                this.T[i].multiply(Ry);
                 this.T[i].multiply(Rz);
+
+                //var Rz = new THREE.Matrix4;
+                //Rz.makeRotationZ(jointR );
+                //this.T[i].multiply(Rz);
+
                 // this.T[i].set (                 Math.cos(thetai),-Math.sin(thetai),0,ai,
                 // Math.sin(thetai)*Math.cos(alphai), Math.cos(thetai)*Math.cos(alphai), -Math.sin(alphai), -di*Math.sin(alphai),
                 // Math.sin(thetai)*Math.sin(alphai), Math.cos(thetai)*Math.sin(alphai), Math.cos(alphai),  di*Math.cos(alphai),
@@ -102,11 +121,8 @@ class SerialRobot {
             
             if( i > 0){
                 this.T[i].premultiply(this.T[i-1]);
-            }
-           
+            }           
         } 
-
-
     }
 
     async createMesh(){
