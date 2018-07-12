@@ -68,6 +68,7 @@ function loadModelFile(filename){
     modelFileName = filename;
     //console.log('Loading the model: ' + modelFileName);
     scene3D.loadModel(filename).then(()=>{
+        console.log(scene3D.scene.children);
         document.getElementById('loading').style.visibility = 'hidden';
 
         //wait until the model is fully loaded.
