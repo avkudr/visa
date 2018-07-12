@@ -29,7 +29,7 @@ function createWindow() {
     }) 
     mainWindow.maximize();
     mainWindow.loadURL('file://' + __dirname + '/src/index.html');
-    //mainWindow.toggleDevTools();
+    mainWindow.toggleDevTools();
 
     mainWindow.on('close', (e) => { app.quit(); });
 

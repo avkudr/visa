@@ -74,6 +74,7 @@ Scene3D.prototype.animate = function(){
 
     for (let robot of this.robots){
         robot.update();
+        console.log(robot);
     }
 
     this.trackballControls.update();
@@ -204,6 +205,8 @@ Scene3D.prototype.loadModel = async function(path){
             this.scene.add(robot.mesh);
         }
     }
+
+    //console.log(this.robots);
 
     this.cameras = [];
     if (data["cameras"] !== undefined){
