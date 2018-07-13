@@ -12,17 +12,17 @@ const {SerialRobot} = require(path.resolve(__dirname,"./../SerialRobot.js"));
 class Viper650 extends SerialRobot{
     constructor(){
         // sigma, tx, ty, tz, rx, ry, rz -Math.PI/2
+        // sigma = 0 => revolute joint
+        // sigma = 1 => prismatic joint
         super([
-            [  0, 0,0,203.0,        0,0,0],	//base -> c1
-            [  0,75,0,335.0-203.0,  -Math.PI/2,0,0],	//base -> c1
-            [  0,270,0,0,      0,0,-Math.PI/2],
-            [  0,108,-90,0,      0, Math.PI/2,0],
-            [  0,0,0,295-108,      0,-Math.PI/2,0],
-            [  0,52,0,0,      0,Math.PI/2,Math.PI/2],
-            [  0,0,0,181.6-52,      0,0,0]
+            [  0,   0,   0,       203.0,          0,          0,          0],	//base -> c1
+            [  0,  75,   0, 335.0-203.0, -Math.PI/2,          0,          0],	//c1 -> c2
+            [  0, 270,   0,           0,          0,          0, -Math.PI/2],
+            [  0, 108, -90,           0,          0,  Math.PI/2,          0],
+            [  0,   0,   0,     295-108,          0, -Math.PI/2,          0],
+            [  0,  52,   0,           0,          0,  Math.PI/2,  Math.PI/2],
+            [  0,   0,   0,    181.6-52,          0,          0,          0]
         ]);
-
-        this.jointTypes = ['R','R','R','R','R','R'];
     }
 
     async createMesh(){
@@ -52,12 +52,12 @@ class Viper650 extends SerialRobot{
 
     getJointLimits(){
         let limits = [
-            [Math.rad(-170),Math.rad(170)],
-            [Math.rad(-190),Math.rad( 45)],
-            [Math.rad( -29),Math.rad(256)],
-            [Math.rad(-190),Math.rad(190)],
-            [Math.rad(-120),Math.rad(120)],
-            [Math.rad(-360),Math.rad(360)]
+            [ Math.rad(-170), Math.rad(170)],
+            [ Math.rad(-190), Math.rad( 45)],
+            [ Math.rad( -29), Math.rad(256)],
+            [ Math.rad(-190), Math.rad(190)],
+            [ Math.rad(-120), Math.rad(120)],
+            [ Math.rad(-360), Math.rad(360)]
         ];
         return limits;
     }

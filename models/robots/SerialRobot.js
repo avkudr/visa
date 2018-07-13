@@ -9,39 +9,37 @@ const THREE = require('three');
 
 class SerialRobot {
     constructor(forwardKinematics) {
-        if (forwardKinematics === undefined){
+        if (forwardKinematics === undefined) {
             this.forwardKinematics = [
                 // sigma, Ry, Rx, Tx, Rz, Tz      
-                [      0,  0,  0,  0,  0, 10.0], //base -> q0      
-                [      0,  0,  0,  0,  0, 15.0], //q0   -> q1	  
-                [      0,  0,  0,  0,  0, 15.0], //q1   -> q2
-                [      0,  0,  0,  0,  0, 15.0]  //q2   -> end-effector
+                [1, 0, 0, 0, 0, 10.0], //base -> q0      
+                [1, 0, 0, 0, 0, 15.0], //q0   -> q1	  
+                [1, 0, 0, 0, 0, 15.0], //q1   -> q2
+                [1, 0, 0, 0, 0, 15.0]  //q2   -> end-effector
             ];
-        }else{
+        } else {
             this.forwardKinematics = forwardKinematics;
         }
-        this.nbDOFs = this.forwardKinematics.length-1;
+        this.nbDOFs = this.forwardKinematics.length - 1;
 
-        this.kinematicsModelType = (this.forwardKinematics[0].length == 6) ? "DHmod" : "DH";
         console.log("Kinematics model type: " + this.kinematicsModelType);
         this.jointTypes = new Array(this.nbDOFs);
         this.jointLimits = new Array(this.nbDOFs);
-        for (let i = 0; i < this.nbDOFs; i++){
-            this['q'+ i] = 0;
-            this.jointTypes[i] = 'P';
-            this.jointLimits[i] = [-20, 20];
+        for (let i = 0; i < this.nbDOFs; i++) {
+            this['q' + i] = 0;
+            let jointType = this.forwardKinematics[i][0];
+            this.jointTypes[i] = jointType == 0 ? 'R' : 'P';
+            this.jointLimits[i] = jointType == 0 ? [-Math.PI, -Math.PI] : [-20, 20];
         }
 
         this.scale = 1;
-        this.position = [0,0,0];
-        this.rotation = [0,0,0];
-
-        this.T = new Array(this.nbDOFs); //transformation matrices for all joints
-
+        this.position = [0, 0, 0];
+        this.rotation = [0, 0, 0];
+        this.T = new Array(this.nbDOFs); //transformation matrices for all joints: 0T1,0T2,0T3...
         this.isInitDone = false;
     }
 
-    async init(){
+    async init() {
         this.updateKinematics();
         let dummy = await this.createMesh();
         this.createAxes();
@@ -49,8 +47,8 @@ class SerialRobot {
         return dummy;
     }
 
-    updateKinematics(){
-        for (var i = 0; i < this.nbDOFs + 1; i++){
+    updateKinematics() {
+        for (var i = 0; i < this.nbDOFs + 1; i++) {
 
             var Tx = new THREE.Matrix4;
             var Ty = new THREE.Matrix4;
@@ -61,146 +59,137 @@ class SerialRobot {
 
             let jointT = 0;
             let jointR = 0;
-            if (i < this.nbDOFs){
-                if (this.jointTypes[i] == 'R') jointR = this['q'+i];
-                if (this.jointTypes[i] == 'P') jointT = this['q'+i];
+            if (i < this.nbDOFs) {
+                if (this.jointTypes[i] == 'R') jointR = this['q' + i];
+                if (this.jointTypes[i] == 'P') jointT = this['q' + i];
             }
-       
+
             this.T[i] = new THREE.Matrix4;
-            
-            if (this.kinematicsModelType == "DHmod"){
-                Ry.makeRotationY(this.forwardKinematics[i][1]);
-                Rx.makeRotationX(this.forwardKinematics[i][2]);
-                Tx.makeTranslation(this.forwardKinematics[i][3], 0, 0);
-                Rz.makeRotationZ(this.forwardKinematics[i][4] + jointR );
-                Tz.makeTranslation( 0, 0, this.forwardKinematics[i][5] + jointT);
 
-                this.T[i].multiply(Ry);
-                this.T[i].multiply(Rx);
-                this.T[i].multiply(Tx);
-                this.T[i].multiply(Rz);
-                this.T[i].multiply(Tz);
-            }else{
-                let tx = this.forwardKinematics[i][1];
-                let ty = this.forwardKinematics[i][2];
-                let tz = this.forwardKinematics[i][3] + jointT;
-                let rx = this.forwardKinematics[i][4];
-                let ry = this.forwardKinematics[i][5];
-                let rz = this.forwardKinematics[i][6] + jointR;
-                
-                // this.T[i].set ( Math.cos(thetai), -Math.sin(thetai)*Math.cos(alphai), Math.sin(thetai)*Math.sin(alphai), ai*Math.cos(thetai),
-                //                 Math.sin(thetai),  Math.cos(thetai)*Math.cos(alphai),-Math.cos(thetai)*Math.sin(alphai), ai*Math.sin(thetai),
-                //                                0,                   Math.sin(alphai),                  Math.cos(alphai),                  di,
-                //                                0,                                  0,                                 0,                   1);
+            let tx = this.forwardKinematics[i][1];
+            let ty = this.forwardKinematics[i][2];
+            let tz = this.forwardKinematics[i][3] + jointT;
+            let rx = this.forwardKinematics[i][4];
+            let ry = this.forwardKinematics[i][5];
+            let rz = this.forwardKinematics[i][6] + jointR;
 
-                Rx.makeRotationX(rx);
-                Ry.makeRotationY(ry);
-                Rz.makeRotationZ(rz);
-                Tx.makeTranslation(tx, 0, 0);
-                Ty.makeTranslation( 0,ty, 0);
-                Tz.makeTranslation( 0, 0,tz);
+            let cx = Math.cos(rx); let sx = Math.sin(rx);
+            let cy = Math.cos(ry); let sy = Math.sin(ry);
+            let cz = Math.cos(rz); let sz = Math.sin(rz);
 
-                
-                this.T[i].multiply(Tx);
-                this.T[i].multiply(Ty);
-                this.T[i].multiply(Tz);
-                this.T[i].multiply(Rx);
-                this.T[i].multiply(Ry);
-                this.T[i].multiply(Rz);
+            // T[i] = Tx * Ty * Tz * Rx * Ry * Rz
+            this.T[i].set(cy * cz, -cy * sz, sy, tx,
+                cx * sz + cz * sx * sy, cx * cz - sx * sy * sz, -cy * sx, ty,
+                sx * sz - cx * cz * sy, cz * sx + cx * sy * sz, cx * cy, tz,
+                0, 0, 0, 1);
+            // Rx.makeRotationX(rx);
+            // Ry.makeRotationY(ry);
+            // Rz.makeRotationZ(rz);
+            // Tx.makeTranslation(tx, 0, 0);
+            // Ty.makeTranslation( 0,ty, 0);
+            // Tz.makeTranslation( 0, 0,tz);
 
-                //var Rz = new THREE.Matrix4;
-                //Rz.makeRotationZ(jointR );
-                //this.T[i].multiply(Rz);
+            // this.T[i].multiply(Tx);
+            // this.T[i].multiply(Ty);
+            // this.T[i].multiply(Tz);
+            // this.T[i].multiply(Rx);
+            // this.T[i].multiply(Ry);
+            // this.T[i].multiply(Rz);
 
-                // this.T[i].set (                 Math.cos(thetai),-Math.sin(thetai),0,ai,
-                // Math.sin(thetai)*Math.cos(alphai), Math.cos(thetai)*Math.cos(alphai), -Math.sin(alphai), -di*Math.sin(alphai),
-                // Math.sin(thetai)*Math.sin(alphai), Math.cos(thetai)*Math.sin(alphai), Math.cos(alphai),  di*Math.cos(alphai),
-                //                0,                                  0,                                 0,                   1);
-                             
-            } 
-            
-            if( i > 0){
-                this.T[i].premultiply(this.T[i-1]);
-            }           
-        } 
+            // Denavit-Hartenberg
+            // this.T[i].set ( Math.cos(thetai), -Math.sin(thetai)*Math.cos(alphai), Math.sin(thetai)*Math.sin(alphai), ai*Math.cos(thetai),
+            //                 Math.sin(thetai),  Math.cos(thetai)*Math.cos(alphai),-Math.cos(thetai)*Math.sin(alphai), ai*Math.sin(thetai),
+            //                                0,                   Math.sin(alphai),                  Math.cos(alphai),                  di,
+            //                                0,                                  0,                                 0,                   1);
+
+            // Denavit-Hartenberg modified
+            // this.T[i].set (                 Math.cos(thetai),-Math.sin(thetai),0,ai,
+            // Math.sin(thetai)*Math.cos(alphai), Math.cos(thetai)*Math.cos(alphai), -Math.sin(alphai), -di*Math.sin(alphai),
+            // Math.sin(thetai)*Math.sin(alphai), Math.cos(thetai)*Math.sin(alphai), Math.cos(alphai),  di*Math.cos(alphai),
+            //                0,                                  0,                                 0,                   1);
+
+            if (i > 0) {
+                this.T[i].premultiply(this.T[i - 1]);
+            }
+        }
     }
 
-    async createMesh(){
+    async createMesh() {
         this.mesh = new THREE.Group();
         this.mesh.matrixAutoUpdate = false;
 
-        let geometry = new THREE.BoxGeometry( 30, 30, 10 );
-        for (let v of geometry.vertices){
+        let geometry = new THREE.BoxGeometry(30, 30, 10);
+        for (let v of geometry.vertices) {
             v.z += 5;
         }
-        let material = new THREE.MeshStandardMaterial( {color: 0xff3399} );
-        this.baseMesh = new THREE.Mesh( geometry, material );
+        let material = new THREE.MeshStandardMaterial({ color: 0xff3399 });
+        this.baseMesh = new THREE.Mesh(geometry, material);
         this.baseMesh.matrixAutoUpdate = false;
         this.mesh.add(this.baseMesh);
 
         this.linksMeshes = new Array(this.nbDOFs);
 
-        for (let i = 0; i < this.nbDOFs; i++){
-            let geometry = new THREE.BoxGeometry( 20-2*i, 20-2*i, 15 );
-            for (let v of geometry.vertices){
+        for (let i = 0; i < this.nbDOFs; i++) {
+            let geometry = new THREE.BoxGeometry(20 - 2 * i, 20 - 2 * i, 15);
+            for (let v of geometry.vertices) {
                 v.z += 7.5;
             }
 
-            let material = new THREE.MeshStandardMaterial( {color: 0xff9933} );
-            let cube = new THREE.Mesh( geometry, material );
+            let material = new THREE.MeshStandardMaterial({ color: 0xff9933 });
+            let cube = new THREE.Mesh(geometry, material);
             this.linksMeshes[i] = cube;
-            this.linksMeshes[i].matrix.copy( this.T[i]);
+            this.linksMeshes[i].matrix.copy(this.T[i]);
             this.mesh.add(this.linksMeshes[i]);
         }
     }
 
-    updateMesh(){
-        if (this.mesh !== undefined){
-            for (let i = 0; i < this.nbDOFs; i++){
-                if (this.linksMeshes[i] !== undefined){
+    updateMesh() {
+        if (this.mesh !== undefined) {
+            for (let i = 0; i < this.nbDOFs; i++) {
+                if (this.linksMeshes[i] !== undefined) {
                     let link = this.linksMeshes[i];
-                    link.matrixAutoUpdate = false;	
+                    link.matrixAutoUpdate = false;
                     link.matrix.copy(this.T[i]);
                     link.updateMatrixWorld(true);
                 }
             }
 
-            if ( this.baseMesh !== undefined){
+            if (this.baseMesh !== undefined) {
                 this.baseMesh.matrix.copy(this.mesh.matrix);
             }
         }
     }
 
-    createAxes(){
+    createAxes() {
         let axesSize = 1.2 * Math.max(...this.forwardKinematics[0]);
         this.axes = new THREE.Group();
         this.axes.matrixAutoUpdate = false;
         this.axesVisible = true;
 
         this.linksAxes = new Array(this.nbDOFs + 1);
-        for (let i = 0; i < this.linksAxes.length; i++){
-            this.linksAxes[i] = new THREE.AxisHelper( axesSize );
+        for (let i = 0; i < this.linksAxes.length; i++) {
+            this.linksAxes[i] = new THREE.AxisHelper(axesSize);
             this.linksAxes[i].matrixAutoUpdate = false;
             this.linksAxes[i].visible = true;
-            this.linksAxes[i].matrix.copy( this.T[i] );
-            this.axes.add( this.linksAxes[i] );
+            this.linksAxes[i].matrix.copy(this.T[i]);
+            this.axes.add(this.linksAxes[i]);
         }
 
-        this.axesRobotBase = new THREE.AxisHelper( 25 ); 
+        this.axesRobotBase = new THREE.AxisHelper(25);
         this.axesRobotBase.matrixAutoUpdate = false;
         this.axesRobotBase.visible = true;
-        this.axesRobotBase.matrix.copy( this.mesh.matrix );
-        this.axes.add( this.axesRobotBase );
+        this.axesRobotBase.matrix.copy(this.mesh.matrix);
+        this.axes.add(this.axesRobotBase);
 
-        this.mesh.add( this.axes );
+        this.mesh.add(this.axes);
     }
 
-    updateAxes(){
-        if (this.axesVisible){
-            for (let i = 0; i < this.linksAxes.length; i++){
-                if (this.linksAxes[i] !== undefined){
+    updateAxes() {
+        if (this.axesVisible) {
+            for (let i = 0; i < this.linksAxes.length; i++) {
+                if (this.linksAxes[i] !== undefined) {
                     let axis = this.linksAxes[i];
-                    axis.matrixAutoUpdate = false;	
+                    axis.matrixAutoUpdate = false;
                     axis.matrix.copy(this.T[i]);
                     axis.updateMatrixWorld(true);
                 }
@@ -209,68 +198,68 @@ class SerialRobot {
             this.axesRobotBase.matrix.copy(this.mesh.matrix);
             this.axesRobotBase.updateMatrixWorld(true);
             this.axes.visible = true;
-        }else{
+        } else {
             this.axes.visible = false;
         }
     }
 
-    getNbDOFs(){
+    getNbDOFs() {
         return this.nbDOFs;
     }
 
-    getJointLimits(){
+    getJointLimits() {
         return this.jointLimits;
     }
 
-    setJointPos(q){
-        if (q.length !== this.nbDOFs){
+    setJointPos(q) {
+        if (q.length !== this.nbDOFs) {
             console.error('The size of joint values array must match the number of robot degrees of freedom');
             return;
         }
-        for (let i = 0; i < this.nbDOFs; i++){
-            this['q'+ i] = q[i];
+        for (let i = 0; i < this.nbDOFs; i++) {
+            this['q' + i] = q[i];
         }
     }
 
-    getJointPos(){
+    getJointPos() {
         let q = new Array(this.nbDOFs);
-        for (let i = 0; i < this.nbDOFs; i++){
-            q[i] = this['q'+ i];
+        for (let i = 0; i < this.nbDOFs; i++) {
+            q[i] = this['q' + i];
         }
         return q;
     }
 
-    setScale(scale){
+    setScale(scale) {
         this.scale = scale;
     }
-    setPosition(position){
+    setPosition(position) {
         this.position = position;
     }
-    setRotation(rotation){
+    setRotation(rotation) {
         this.rotation = rotation;
     }
 
-    get endeffector(){
+    get endeffector() {
         let endEffectorPose = new THREE.Matrix4;
-        endEffectorPose.copy(this.T[this.T.length-1]);
+        endEffectorPose.copy(this.T[this.T.length - 1]);
         endEffectorPose.premultiply(this.mesh.matrix);
         return endEffectorPose;
     }
 
     update() {
-        if (this.isInitDone){
+        if (this.isInitDone) {
             this.updateKinematics();
             this.updateMesh();
             this.updateAxes();
 
-            this.mesh.scale.set(this.scale,this.scale,this.scale);
-            this.mesh.position.set(this.position[0],this.position[1],this.position[2]);
-            this.mesh.rotation.set(this.rotation[0],this.rotation[1],this.rotation[2]);
+            this.mesh.scale.set(this.scale, this.scale, this.scale);
+            this.mesh.position.set(this.position[0], this.position[1], this.position[2]);
+            this.mesh.rotation.set(this.rotation[0], this.rotation[1], this.rotation[2]);
             this.mesh.updateMatrix();
         }
     }
 
-    toggleDisplayFrames(){
+    toggleDisplayFrames() {
         //toggle visibility of axes
     }
 }
