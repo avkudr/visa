@@ -4,24 +4,34 @@
             "fov":60,
             "near":0.01,
             "far":2000,
-            "position":[250,300,100],
-            "lookAt":[0,0,100]
+            "position":[150,150,150],
+            "lookAt":[0,0,-80]
         }
     },
     "objects":[
         {
             "file":"target_4dots.obj",
-            "position":[65,35,0],
-            "scale":[4,4,4]    
+            "scale":[1,1,1],
+            "position":[40,0,0]   
         }
     ],
     "robots":[
         {
             "type": "Viper650",
             "scale": 0.1,
-            "jointValues": [0,-1.57,3.14,0,0,0],
+            "jointValues": [0,-1.57,3.03,0,1.54,0],
             "position":[0,0,0],
             "rotation":[0,0,0]
+        }
+    ],
+    "cameras":[
+        {
+            "fieldOfView": 30,
+            "width": 640,
+            "height": 480,
+            "relativeTo": "robots.0.endeffector",
+            "position":[0,0,100],
+            "rotation":[0,0,-1.57]
         }
     ]
 }

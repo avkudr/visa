@@ -6,6 +6,16 @@ const OBJLoader = require(global.appLibsDir() + '/OBJLoader.js');
 const STLLoader = require(global.appLibsDir() + '/STLLoader.js');
 const ColladaLoader = require(global.appLibsDir() + '/ColladaLoader.js');
 
+// Converts from degrees to radians.
+Math.rad = function(degrees) {
+    return degrees * Math.PI / 180;
+};
+
+// Converts from radians to degrees.
+Math.deg = function(radians) {
+    return radians * 180 / Math.PI;
+};
+
 const Loaders = {
 
     obj: async function(file){

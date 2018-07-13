@@ -18,8 +18,8 @@ class Viper650 extends SerialRobot{
             [  0,270,0,0,      0,0,-Math.PI/2],
             [  0,108,-90,0,      0, Math.PI/2,0],
             [  0,0,0,295-108,      0,-Math.PI/2,0],
-            [  0,80,0,0,      0,Math.PI/2,0],
-            [  0,0,0,101.6,      0,0,0]
+            [  0,52,0,0,      0,Math.PI/2,Math.PI/2],
+            [  0,0,0,181.6-52,      0,0,0]
         ]);
 
         this.jointTypes = ['R','R','R','R','R','R'];
@@ -30,7 +30,10 @@ class Viper650 extends SerialRobot{
         let STLLinks = [
             path.resolve(__dirname,'c1.stl'),
             path.resolve(__dirname,'c2.stl'),
-            path.resolve(__dirname,'c3.stl')];
+            path.resolve(__dirname,'c3.stl'),
+            path.resolve(__dirname,'c4.stl'),
+            path.resolve(__dirname,'c5.stl'),
+            path.resolve(__dirname,'c6.stl')];
 
         this.mesh = new THREE.Group();
         this.mesh.matrixAutoUpdate = false;
@@ -49,12 +52,12 @@ class Viper650 extends SerialRobot{
 
     getJointLimits(){
         let limits = [
-            [-3.14,3.14],
-            [-3.14,3.14],
-            [-3.14,3.14],
-            [-3.14,3.14],
-            [-3.14,3.14],
-            [-3.14,3.14]
+            [Math.rad(-170),Math.rad(170)],
+            [Math.rad(-190),Math.rad( 45)],
+            [Math.rad( -29),Math.rad(256)],
+            [Math.rad(-190),Math.rad(190)],
+            [Math.rad(-120),Math.rad(120)],
+            [Math.rad(-360),Math.rad(360)]
         ];
         return limits;
     }
