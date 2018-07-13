@@ -29,7 +29,7 @@ class SerialRobot {
             this['q' + i] = 0;
             let jointType = this.forwardKinematics[i][0];
             this.jointTypes[i] = jointType == 0 ? 'R' : 'P';
-            this.jointLimits[i] = jointType == 0 ? [-Math.PI, -Math.PI] : [-20, 20];
+            this.jointLimits[i] = jointType == 0 ? [-Math.PI, Math.PI] : [-20, 20];
         }
 
         this.scale = 1;
@@ -216,7 +216,16 @@ class SerialRobot {
             console.error('The size of joint values array must match the number of robot degrees of freedom');
             return;
         }
+
+        console.log(this.jointLimits);
         for (let i = 0; i < this.nbDOFs; i++) {
+            if ( q[i] > this.jointLimits[i][1] ){
+                q[i] = this.jointLimits[i][1];
+                console.warn(this.constructor.name + ": axis " + i + " is in high limit");
+            }else if ( q[i] < this.jointLimits[i][0] ){
+                q[i] = this.jointLimits[i][0];
+                console.warn(this.constructor.name + ": axis " + i + " is in low limit");
+            }
             this['q' + i] = q[i];
         }
     }
@@ -237,6 +246,14 @@ class SerialRobot {
     }
     setRotation(rotation) {
         this.rotation = rotation;
+    }
+
+    getToolTransform(){
+        let T = this.endeffector;
+        T.multiplyScalar(1.0/this.scale);
+        T.elements[15] = 1.0;
+        return T;
+        // return this.axisT3.matrix; // may be it's better ?
     }
 
     get endeffector() {

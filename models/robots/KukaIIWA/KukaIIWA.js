@@ -11,18 +11,26 @@ const {SerialRobot} = require(path.resolve(__dirname,"./../SerialRobot.js"));
 
 class KukaIIWA extends SerialRobot{
     constructor(){
-        super([ //Tx, Tz, Rx, Ry, Rz,    
-            [  0, 		0, 0,  157.0,          0,           0,          0],	//base -> c1
-            [  0,  -182.7, 0,   0.28, -Math.PI/2,   Math.PI/2, -Math.PI/2],	//c1 -> c2
-            [  0,	    0, 0,  216.6,  Math.PI/2,           0,          0],	//c2 -> c3
-            [  0,	183.4, 0,   -0.5,  Math.PI/2,  -Math.PI/2, -Math.PI/2],	//c3 -> c4
-            [  0, 	  0.5, 0,  216.6, -Math.PI/2,           0,          0],	//c4 -> c5
-            [  0,  -183.2, 0,  -60.7, -Math.PI/2,   Math.PI/2,          0],	//c5 -> c6
-            [  0,    60.7, 0,     81, 	       0,  -Math.PI/2,          0],	//c6 -> c7
-            [  0, 		0, 0,     45,          0,           0,          0]	//c7 -> end-effector
+        super([ //Tx, Ty, Tz, Rx, Ry, Rz,    
+            [  0, 		0,      0,  157.0,          0,           0,          0],	//base -> c1
+            [  0,       0,      0,  183.0, -Math.PI/2,           0,          0],	//c1 -> c2
+            [  0,	    0, -216.6,      0,  Math.PI/2,           0,          0],	//c2 -> c3
+            [  0,       0,      0,  183.4,  Math.PI/2,           0,          0],	//c3 -> c4
+            [  0, 	    0,  216.6,      0, -Math.PI/2,           0,          0],	//c4 -> c5
+            [  0,       0,  -60.7,  183.2, -Math.PI/2,           0,  Math.PI/2],	//c5 -> c6
+            [  0,   -81.0,      0,   60.7, 	        0,  -Math.PI/2,          0],	//c6 -> c7
+            [  0, 		0,      0,     45,          0,           0,          0]	//c7 -> end-effector
         ]);
 
-        this.jointTypes = ['R','R','R','R','R','R','R'];
+        this.jointLimits = [
+            [ Math.rad(-170), Math.rad(170)],
+            [ Math.rad(-120), Math.rad(120)],
+            [ Math.rad(-170), Math.rad(170)],
+            [ Math.rad(-120), Math.rad(120)],
+            [ Math.rad(-170), Math.rad(170)],
+            [ Math.rad(-120), Math.rad(120)],
+            [ Math.rad(-175), Math.rad(175)]
+        ];
     }
 
     async createMesh(){
@@ -49,19 +57,6 @@ class KukaIIWA extends SerialRobot{
             this.linksMeshes[i].matrix.copy(this.T[i]);
             this.mesh.add( this.linksMeshes[i] );
         }
-    }
-
-    getJointLimits(){
-        let limits = [
-            [-3.14,3.14],
-            [-3.14,3.14],
-            [-3.14,3.14],
-            [-3.14,3.14],
-            [-3.14,3.14],
-            [-3.14,3.14],
-            [-3.14,3.14]
-        ];
-        return limits;
     }
 }
 

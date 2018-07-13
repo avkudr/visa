@@ -58,8 +58,7 @@ RobotController.prototype.handle = function(arg){
             return this.robot.getJointPos().toString();
         }
         case 'GETTOOLPOS':{ //returns matrix elements in a column-major order
-            let T = this.robot.getToolTransform().toArray().toString();
-            return T;
+            return this.robot.getToolTransform().toArray().toString();
         }
         default: 
             return 'unknown_command';

@@ -23,6 +23,15 @@ class Viper650 extends SerialRobot{
             [  0,  52,   0,           0,          0,  Math.PI/2,  Math.PI/2],
             [  0,   0,   0,    181.6-52,          0,          0,          0]
         ]);
+
+        this.jointLimits = [
+            [ Math.rad(-170), Math.rad(170)],
+            [ Math.rad(-190), Math.rad( 45)],
+            [ Math.rad( -29), Math.rad(256)],
+            [ Math.rad(-190), Math.rad(190)],
+            [ Math.rad(-120), Math.rad(120)],
+            [ Math.rad(-360), Math.rad(360)]
+        ];
     }
 
     async createMesh(){
@@ -48,18 +57,6 @@ class Viper650 extends SerialRobot{
             this.linksMeshes[i].matrix.copy(this.T[i]);
             this.mesh.add( this.linksMeshes[i] );
         }
-    }
-
-    getJointLimits(){
-        let limits = [
-            [ Math.rad(-170), Math.rad(170)],
-            [ Math.rad(-190), Math.rad( 45)],
-            [ Math.rad( -29), Math.rad(256)],
-            [ Math.rad(-190), Math.rad(190)],
-            [ Math.rad(-120), Math.rad(120)],
-            [ Math.rad(-360), Math.rad(360)]
-        ];
-        return limits;
     }
 }
 
