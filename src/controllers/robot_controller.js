@@ -60,6 +60,9 @@ RobotController.prototype.handle = function(arg){
         case 'GETTOOLPOS':{ //returns matrix elements in a column-major order
             return this.robot.getToolTransform().toArray().toString();
         }
+        case 'GETJACOBIAN':{
+            return this.robot.getJacobian().toString();
+        }
         default: 
             return 'unknown_command';
     }

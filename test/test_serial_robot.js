@@ -35,7 +35,7 @@ describe('Serial robot: default', () => {
         robot.setJointPos([0,0,0]);
         let T = robot.getToolTransform();
         let Texpected = new THREE.Matrix4();
-        Texpected.elements[14] = 55;
+        Texpected.elements[14] = 55 / 1000;
         expect(T).to.be.deep.almost(Texpected);
     }); 
 
@@ -50,13 +50,6 @@ describe('Serial robot: default', () => {
 
         assert.deepEqual(T,T1);
     }); 
-
-    it('last frame pose = tool pose', () => {   
-        robot.setJointPos([0,0,0]);
-        let T      = robot.getToolTransform();
-        let Tframe = robot.linksAxes[robot.nbDOFs].matrix;
-        assert.deepEqual(T,Tframe);
-    });
 
     it('respecting limits', () => {   
         let pos = [0,0,0]; 
@@ -89,7 +82,7 @@ describe('Serial robot: KukaIIWA', () => {
         robot.setJointPos([0,0,0,0,0,0,0]);
         let T = robot.getToolTransform();
         let Texpected = new THREE.Matrix4();
-        Texpected.elements = [ 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1265.8,1 ];
+        Texpected.elements = [ 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1.2658,1 ];
         expect(T.elements).to.be.deep.almost(Texpected.elements);
     }); 
 

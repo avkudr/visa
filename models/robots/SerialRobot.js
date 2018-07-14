@@ -246,12 +246,66 @@ class SerialRobot {
         this.rotation = rotation;
     }
 
-    getToolTransform(){
-        let T = this.endeffector;
-        //T.multiplyScalar(1.0/this.scale);
-        T.elements[15] = 1.0;
+    getJointTransform(i){
+        let T = this.T[i].clone();
+        T.elements[12] *= 0.001;
+        T.elements[13] *= 0.001;
+        T.elements[14] *= 0.001;
         return T;
-        // return this.axisT3.matrix; // may be it's better ?
+    }
+
+    getToolTransform(){
+        return this.getJointTransform(this.T.length - 1);
+    }
+
+    getJacobian(){
+        let J = new Array(6);
+        for (var i = 0; i < J.length; i++) {
+            J[i] = new Array(this.nbDOFs);
+        }
+
+        let T = this.getToolTransform();
+        let On = [T.elements[12], T.elements[13], T.elements[14]];
+
+        for (let i = 0; i < this.nbDOFs; i++){
+            let Ti = this.getJointTransform(i);
+            let zi = new THREE.Vector3( Ti.elements[8], Ti.elements[9], Ti.elements[10]);
+
+            if (this.jointTypes[i] == 'R'){
+                let Oi = [Ti.elements[12], Ti.elements[13], Ti.elements[14]];
+                
+                let O = {
+                    x: On[0] - Oi[0],
+                    y: On[1] - Oi[1],
+                    z: On[2] - Oi[2]
+                };
+                let crossProd = {
+                    x: zi.y * O.z - zi.z * O.y,
+                    y: zi.z * O.x - zi.x * O.z,
+                    z: zi.x * O.y - zi.y * O.x,
+                };
+                
+                J[0][i] = crossProd.x;
+                J[1][i] = crossProd.y;
+                J[2][i] = crossProd.z;
+                J[3][i] = zi.x;
+                J[4][i] = zi.y;
+                J[5][i] = zi.z; 
+            }else{
+                J[0][i] = zi.x;
+                J[1][i] = zi.y;
+                J[2][i] = zi.z;
+                J[3][i] = 0;
+                J[4][i] = 0;
+                J[5][i] = 0; 
+            } 
+
+            for (let j = 0; j < 6; j++){
+                J[j][i] = Math.round(J[j][i] * 1e5) / 1e5;
+            }
+        }
+
+        return J;
     }
 
     get endeffector() {
