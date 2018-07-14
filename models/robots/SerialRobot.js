@@ -11,18 +11,17 @@ class SerialRobot {
     constructor(forwardKinematics) {
         if (forwardKinematics === undefined) {
             this.forwardKinematics = [
-                // sigma, Ry, Rx, Tx, Rz, Tz      
-                [1, 0, 0, 0, 0, 10.0], //base -> q0      
-                [1, 0, 0, 0, 0, 15.0], //q0   -> q1	  
-                [1, 0, 0, 0, 0, 15.0], //q1   -> q2
-                [1, 0, 0, 0, 0, 15.0]  //q2   -> end-effector
+                // sigma, Tx, Ty, Tz, Rx, Ry, Rz    
+                [1, 0, 0, 10.0, 0, 0, 0], //base -> q0      
+                [1, 0, 0, 15.0, 0, 0, 0], //q0   -> q1	  
+                [1, 0, 0, 15.0, 0, 0, 0], //q1   -> q2
+                [1, 0, 0, 15.0, 0, 0, 0]  //q2   -> end-effector
             ];
         } else {
             this.forwardKinematics = forwardKinematics;
         }
         this.nbDOFs = this.forwardKinematics.length - 1;
 
-        console.log("Kinematics model type: " + this.kinematicsModelType);
         this.jointTypes = new Array(this.nbDOFs);
         this.jointLimits = new Array(this.nbDOFs);
         for (let i = 0; i < this.nbDOFs; i++) {
@@ -217,14 +216,13 @@ class SerialRobot {
             return;
         }
 
-        console.log(this.jointLimits);
         for (let i = 0; i < this.nbDOFs; i++) {
             if ( q[i] > this.jointLimits[i][1] ){
                 q[i] = this.jointLimits[i][1];
-                console.warn(this.constructor.name + ": axis " + i + " is in high limit");
+                //console.warn(this.constructor.name + ": axis " + i + " is in high limit");
             }else if ( q[i] < this.jointLimits[i][0] ){
                 q[i] = this.jointLimits[i][0];
-                console.warn(this.constructor.name + ": axis " + i + " is in low limit");
+                //console.warn(this.constructor.name + ": axis " + i + " is in low limit");
             }
             this['q' + i] = q[i];
         }
@@ -250,7 +248,7 @@ class SerialRobot {
 
     getToolTransform(){
         let T = this.endeffector;
-        T.multiplyScalar(1.0/this.scale);
+        //T.multiplyScalar(1.0/this.scale);
         T.elements[15] = 1.0;
         return T;
         // return this.axisT3.matrix; // may be it's better ?

@@ -34,28 +34,32 @@ class KukaIIWA extends SerialRobot{
     }
 
     async createMesh(){
-        let STLBase = path.resolve(__dirname,'base.STL');
-        let STLLinks = [
-            path.resolve(__dirname,'c1.STL'),
-            path.resolve(__dirname,'c2.STL'),
-            path.resolve(__dirname,'c3.STL'),
-            path.resolve(__dirname,'c4.STL'),
-            path.resolve(__dirname,'c5.STL'),
-            path.resolve(__dirname,'c6.STL'),
-            path.resolve(__dirname,'c7.STL')];
+        try {
+            let STLBase = path.resolve(__dirname,'base.STL');
+            let STLLinks = [
+                path.resolve(__dirname,'c1.STL'),
+                path.resolve(__dirname,'c2.STL'),
+                path.resolve(__dirname,'c3.STL'),
+                path.resolve(__dirname,'c4.STL'),
+                path.resolve(__dirname,'c5.STL'),
+                path.resolve(__dirname,'c6.STL'),
+                path.resolve(__dirname,'c7.STL')];
 
-        this.mesh = new THREE.Group();
-        this.mesh.matrixAutoUpdate = false;
-       
-        this.baseMesh = await Loaders.stl(STLBase, 0xff9933);
-        this.baseMesh.matrix.copy(this.mesh.matrix);
-        this.mesh.add( this.baseMesh );
+            this.mesh = new THREE.Group();
+            this.mesh.matrixAutoUpdate = false;
+        
+            this.baseMesh = await Loaders.stl(STLBase, 0xff9933);
+            this.baseMesh.matrix.copy(this.mesh.matrix);
+            this.mesh.add( this.baseMesh );
 
-        this.linksMeshes = new Array(this.nbDOFs);
-        for (let i = 0; i < STLLinks.length; i++){
-            this.linksMeshes[i] = await Loaders.stl( STLLinks[i], 0xff9933 );
-            this.linksMeshes[i].matrix.copy(this.T[i]);
-            this.mesh.add( this.linksMeshes[i] );
+            this.linksMeshes = new Array(this.nbDOFs);
+            for (let i = 0; i < STLLinks.length; i++){
+                this.linksMeshes[i] = await Loaders.stl( STLLinks[i], 0xff9933 );
+                this.linksMeshes[i].matrix.copy(this.T[i]);
+                this.mesh.add( this.linksMeshes[i] );
+            }
+        }catch(error){
+            //console.error(error);
         }
     }
 }
