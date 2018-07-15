@@ -61,7 +61,7 @@ RobotController.prototype.handle = function(arg){
             return this.robot.getToolTransform().toArray().toString();
         }
         case 'GETJACOBIAN':{
-            return this.robot.getJacobian().toString();
+            return this.robot.get_fJe().toString();
         }
         default: 
             return 'unknown_command';
