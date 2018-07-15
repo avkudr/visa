@@ -2,7 +2,7 @@ const chai = require('chai');
 const assert = chai.assert;
 const expect = chai.expect;
 const chaiAlmost = require('chai-almost');
-chai.use(chaiAlmost(1e-6));
+chai.use(chaiAlmost(1e-3));
 
 global.appRootDir = () => {return __dirname + "/../"};
 global.appLibsDir = () => {return global.appRootDir() + "/3rdparty"};
@@ -109,7 +109,7 @@ describe('Serial robot: KukaIIWA', () => {
     }); 
 
     it('right size of Jacobian matrix', () => {    
-        let J = robot.getJacobian();
+        let J = robot.get_fJe();
         expect(J.length).to.be.equal(6);
         expect(J[0].length).to.be.equal(robot.nbDOFs);
     }); 
@@ -129,17 +129,62 @@ describe('Serial robot: Viper650', () => {
         await robot.init();
     });
 
-    it('robot Jacobian values', () => {  
+    it('robot Jacobian values #1 (fJe)', async () => {  
         robot.setJointPos([0,0,0,0,0,0]);
-        let J = robot.getJacobian();
-        console.log(J);
-        let Jexpected = new Array(6);
+        await robot.init();
+        let J = robot.get_fJe();
+        let fJe = new Array(6);
         for (let i = 0; i < 6; i++){
-            Jexpected[i] = new Array(robot.nbDOFs);
-            for (let j = 0; j < robot.nbDOFs; j++){
-                Jexpected[i][j] = 0;
-            }           
+            fJe[i] = new Array(robot.nbDOFs);        
         }
-        expect(J).to.be.deep.almost(Jexpected);
+
+        fJe[0] = [0,0.4766,0.4766,0,0.1816,0];
+        fJe[1] = [0.255,0,0,0,0,0];
+        fJe[2] = [0,-0.18,0.09,0,0,0];
+        fJe[3] = [0,0,0,0,0,0];
+        fJe[4] = [0,1,1,0,1,0];
+        fJe[5] = [1,0,0,1,0,1];
+
+        expect(J).to.be.deep.almost(fJe);
     }); 
+
+    it('robot Jacobian values #2 (fJe)', async () => {  
+        robot.setJointPos([0,-1.570000052,3.029999971,0,1.539999962,0]);
+        await robot.init();
+        let J = robot.get_fJe();
+        let fJe = new Array(6);
+        for (let i = 0; i < 6; i++){
+            fJe[i] = new Array(robot.nbDOFs);        
+        }
+
+        fJe[0] = [0,0.2122835408,-0.05771637361,0,-0.1797826343,0];
+        fJe[1] = [0.3840822861,0,0,0.1815138906,0,0];
+        fJe[2] = [0,-0.3090822861,-0.308867292,0,-0.0256274149,0];
+        fJe[3] = [0,0,0,0.9938683544,0,0.1411201261];
+        fJe[4] = [0,1,1,0,1,0];
+        fJe[5] = [1,0,0,0.1105698604,0,-0.9899924798];
+
+        expect(J).to.be.deep.almost(fJe);
+    }); 
+
+    // it('robot Jacobian values (eJe)', async () => {  
+    //     robot.setJointPos([0,-1.570000052,3.029999971,0,1.539999962,0]);
+    //     await robot.init();
+    //     let eJe = robot.get_eJe();
+
+    //     let eJe_ = new Array(6);
+    //     for (let i = 0; i < 6; i++){
+    //         eJe_[i] = new Array(robot.nbDOFs);        
+    //     }
+
+    //     eJe_[0][0] = [0,-0.1665413778,0.100726167,0,0.1816,0];
+    //     eJe_[1][0] = [0.3840822861,0,0,0.1815138906,0,0];
+    //     eJe_[2][0] = [0,0.3359466189,0.2976313544,0,0,0];
+    //     eJe_[3][0] = [-0.1411201261,0,0,-0.9995258294,0,0];
+    //     eJe_[4][0] = [0,1,1,0,1,0];
+    //     eJe_[5][0] = [-0.9899924798,0,0,0.03079149721,0,1];
+
+    //     expect(eJe).to.be.deep.almost(eJe_);
+    // }); 
+
 });

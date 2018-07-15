@@ -258,7 +258,7 @@ class SerialRobot {
         return this.getJointTransform(this.T.length - 1);
     }
 
-    getJacobian(){
+    get_fJe(){
         let J = new Array(6);
         for (var i = 0; i < J.length; i++) {
             J[i] = new Array(this.nbDOFs);
@@ -270,6 +270,8 @@ class SerialRobot {
         for (let i = 0; i < this.nbDOFs; i++){
             let Ti = this.getJointTransform(i);
             let zi = new THREE.Vector3( Ti.elements[8], Ti.elements[9], Ti.elements[10]);
+            // console.log("z("+i+")");
+            // console.log(zi);
 
             if (this.jointTypes[i] == 'R'){
                 let Oi = [Ti.elements[12], Ti.elements[13], Ti.elements[14]];
@@ -285,24 +287,20 @@ class SerialRobot {
                     z: zi.x * O.y - zi.y * O.x,
                 };
                 
-                J[0][i] = crossProd.x;
-                J[1][i] = crossProd.y;
-                J[2][i] = crossProd.z;
-                J[3][i] = zi.x;
-                J[4][i] = zi.y;
-                J[5][i] = zi.z; 
+                J[0][i] = Math.round( crossProd.x * 1e5) / 1e5;
+                J[1][i] = Math.round( crossProd.y * 1e5) / 1e5;
+                J[2][i] = Math.round( crossProd.z * 1e5) / 1e5;
+                J[3][i] = Math.round( zi.x * 1e5) / 1e5;
+                J[4][i] = Math.round( zi.y * 1e5) / 1e5;
+                J[5][i] = Math.round( zi.z * 1e5) / 1e5; 
             }else{
-                J[0][i] = zi.x;
-                J[1][i] = zi.y;
-                J[2][i] = zi.z;
+                J[0][i] = Math.round( zi.x * 1e5) / 1e5;
+                J[1][i] = Math.round( zi.y * 1e5) / 1e5;
+                J[2][i] = Math.round( zi.z * 1e5) / 1e5;
                 J[3][i] = 0;
                 J[4][i] = 0;
                 J[5][i] = 0; 
             } 
-
-            for (let j = 0; j < 6; j++){
-                J[j][i] = Math.round(J[j][i] * 1e5) / 1e5;
-            }
         }
 
         return J;
