@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "test": "mocha || true"
+    "test": "mocha --inline-diffs || true"
   },
   "author": "Andrey V. Kudryavtsev",
   "license": "GPL-3.0",

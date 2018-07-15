@@ -10,7 +10,12 @@ global.appModelsDir = () => {return global.appRootDir() + "/models"};
 
 const {SerialRobot} = require( __dirname + "/../models/robots/SerialRobot.js" );
 const {KukaIIWA} = require( __dirname + "/../models/robots/KukaIIWA/KukaIIWA.js" );
+const {Viper650} = require( __dirname + "/../models/robots/Viper650/Viper650.js" );
 const THREE = require('three');
+
+//---------------------------------------------------------------------- */
+//            default serial robot
+//---------------------------------------------------------------------- */
 
 describe('Serial robot: default', () => {
 
@@ -62,6 +67,10 @@ describe('Serial robot: default', () => {
     });
 });
 
+//---------------------------------------------------------------------- */
+//            KUKA iiwa
+//---------------------------------------------------------------------- */
+
 describe('Serial robot: KukaIIWA', () => {
 
     let robot;
@@ -97,5 +106,40 @@ describe('Serial robot: KukaIIWA', () => {
         let T1 = robot.getToolTransform();
 
         assert.deepEqual(T,T1);
+    }); 
+
+    it('right size of Jacobian matrix', () => {    
+        let J = robot.getJacobian();
+        expect(J.length).to.be.equal(6);
+        expect(J[0].length).to.be.equal(robot.nbDOFs);
+    }); 
+});
+
+//---------------------------------------------------------------------- */
+//            VIPER-650
+//---------------------------------------------------------------------- */
+
+describe('Serial robot: Viper650', () => {
+
+    let robot;
+
+    before( async () =>{
+        // runs before all tests in this block
+        robot = new Viper650();
+        await robot.init();
+    });
+
+    it('robot Jacobian values', () => {  
+        robot.setJointPos([0,0,0,0,0,0]);
+        let J = robot.getJacobian();
+        console.log(J);
+        let Jexpected = new Array(6);
+        for (let i = 0; i < 6; i++){
+            Jexpected[i] = new Array(robot.nbDOFs);
+            for (let j = 0; j < robot.nbDOFs; j++){
+                Jexpected[i][j] = 0;
+            }           
+        }
+        expect(J).to.be.deep.almost(Jexpected);
     }); 
 });

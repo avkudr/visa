@@ -1,6 +1,6 @@
 /**
- * @file Manages the configuration settings for the widget.
- * @author Marie Bellot, Andrey Kudryavtsev 
+ * @file Interface for the ADEPT Viper 650 robot.
+ * @author Andrey Kudryavtsev 
  */
 
 const THREE = require('three');
@@ -35,27 +35,31 @@ class Viper650 extends SerialRobot{
     }
 
     async createMesh(){
-        let STLBase = path.resolve(__dirname,'base.stl');
-        let STLLinks = [
-            path.resolve(__dirname,'c1.stl'),
-            path.resolve(__dirname,'c2.stl'),
-            path.resolve(__dirname,'c3.stl'),
-            path.resolve(__dirname,'c4.stl'),
-            path.resolve(__dirname,'c5.stl'),
-            path.resolve(__dirname,'c6.stl')];
+        try {
+            let STLBase = path.resolve(__dirname,'base.stl');
+            let STLLinks = [
+                path.resolve(__dirname,'c1.stl'),
+                path.resolve(__dirname,'c2.stl'),
+                path.resolve(__dirname,'c3.stl'),
+                path.resolve(__dirname,'c4.stl'),
+                path.resolve(__dirname,'c5.stl'),
+                path.resolve(__dirname,'c6.stl')];
 
-        this.mesh = new THREE.Group();
-        this.mesh.matrixAutoUpdate = false;
-       
-        this.baseMesh = await Loaders.stl(STLBase, 0xff9933);
-        this.baseMesh.matrix.copy(this.mesh.matrix);
-        this.mesh.add( this.baseMesh );
+            this.mesh = new THREE.Group();
+            this.mesh.matrixAutoUpdate = false;
+        
+            this.baseMesh = await Loaders.stl(STLBase, 0xff9933);
+            this.baseMesh.matrix.copy(this.mesh.matrix);
+            this.mesh.add( this.baseMesh );
 
-        this.linksMeshes = new Array(this.nbDOFs);
-        for (let i = 0; i < STLLinks.length; i++){
-            this.linksMeshes[i] = await Loaders.stl( STLLinks[i], 0xff9933 );
-            this.linksMeshes[i].matrix.copy(this.T[i]);
-            this.mesh.add( this.linksMeshes[i] );
+            this.linksMeshes = new Array(this.nbDOFs);
+            for (let i = 0; i < STLLinks.length; i++){
+                this.linksMeshes[i] = await Loaders.stl( STLLinks[i], 0xff9933 );
+                this.linksMeshes[i].matrix.copy(this.T[i]);
+                this.mesh.add( this.linksMeshes[i] );
+            }
+        }catch(error){
+            
         }
     }
 }
