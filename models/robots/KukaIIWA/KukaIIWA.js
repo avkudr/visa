@@ -9,6 +9,17 @@ const path  = require('path');
 const {Loaders} = require(global.appRootDir() + '/src/loaders.js');
 const {SerialRobot} = require(path.resolve(__dirname,"./../SerialRobot.js"));
 
+// Denavit-Hartenberg model for KUKA LBR iiwa 14 R820
+// !not sure that we have the stl files for the same model
+// [  0, 0,  Math.PI/2,  360, 0],	//base -> c1
+// [  0, 0, -Math.PI/2,    0, 0],	//c1 -> c2
+// [  0, 0, -Math.PI/2,  420, 0],	//c2 -> c3
+// [  0, 0,  Math.PI/2,    0, 0],	//c3 -> c4
+// [  0, 0,  Math.PI/2,  400, 0],	//c4 -> c5
+// [  0, 0, -Math.PI/2,    0, 0],	//c5 -> c6
+// [  0, 0,          0,  126, 0],	//c6 -> c7
+// [  0, 0,          0,    0, 0],
+
 class KukaIIWA extends SerialRobot{
     constructor(){
         super([ //Tx, Ty, Tz, Rx, Ry, Rz,    

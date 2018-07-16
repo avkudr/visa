@@ -22,6 +22,8 @@ class SerialRobot {
         }
         this.nbDOFs = this.forwardKinematics.length - 1;
 
+        this.FKmodel = (this.forwardKinematics[0].length == 5) ? "DH" : "6DOF";
+
         this.jointTypes = new Array(this.nbDOFs);
         this.jointLimits = new Array(this.nbDOFs);
         for (let i = 0; i < this.nbDOFs; i++) {
@@ -49,13 +51,6 @@ class SerialRobot {
     updateKinematics() {
         for (var i = 0; i < this.nbDOFs + 1; i++) {
 
-            var Tx = new THREE.Matrix4;
-            var Ty = new THREE.Matrix4;
-            var Tz = new THREE.Matrix4;
-            var Rx = new THREE.Matrix4;
-            var Ry = new THREE.Matrix4;
-            var Rz = new THREE.Matrix4;
-
             let jointT = 0;
             let jointR = 0;
             if (i < this.nbDOFs) {
@@ -63,52 +58,77 @@ class SerialRobot {
                 if (this.jointTypes[i] == 'P') jointT = this['q' + i];
             }
 
-            this.T[i] = new THREE.Matrix4;
+            this.T[i] = new THREE.Matrix4; 
 
-            let tx = this.forwardKinematics[i][1];
-            let ty = this.forwardKinematics[i][2];
-            let tz = this.forwardKinematics[i][3] + jointT;
-            let rx = this.forwardKinematics[i][4];
-            let ry = this.forwardKinematics[i][5];
-            let rz = this.forwardKinematics[i][6] + jointR;
+            if (this.FKmodel == "DH"){
 
-            let cx = Math.cos(rx); let sx = Math.sin(rx);
-            let cy = Math.cos(ry); let sy = Math.sin(ry);
-            let cz = Math.cos(rz); let sz = Math.sin(rz);
+                // Denavit-Hartenberg
+                let ai     = this.forwardKinematics[i][1];
+                let alphai = this.forwardKinematics[i][2];
+                let di     = this.forwardKinematics[i][3];
+                let thetai = this.forwardKinematics[i][4] + jointR;
 
-            // T[i] = Tx * Ty * Tz * Rx * Ry * Rz
-            this.T[i].set(cy * cz, -cy * sz, sy, tx,
-                cx * sz + cz * sx * sy, cx * cz - sx * sy * sz, -cy * sx, ty,
-                sx * sz - cx * cz * sy, cz * sx + cx * sy * sz, cx * cy, tz,
-                0, 0, 0, 1);
-            // Rx.makeRotationX(rx);
-            // Ry.makeRotationY(ry);
-            // Rz.makeRotationZ(rz);
-            // Tx.makeTranslation(tx, 0, 0);
-            // Ty.makeTranslation( 0,ty, 0);
-            // Tz.makeTranslation( 0, 0,tz);
+                this.T[i].set ( Math.cos(thetai), -Math.sin(thetai)*Math.cos(alphai), Math.sin(thetai)*Math.sin(alphai), ai*Math.cos(thetai),
+                                Math.sin(thetai),  Math.cos(thetai)*Math.cos(alphai),-Math.cos(thetai)*Math.sin(alphai), ai*Math.sin(thetai),
+                                               0,                   Math.sin(alphai),                  Math.cos(alphai),                  di,
+                                               0,                                  0,                                 0,                   1);
+                
+                if (i > 0) this.T[i].premultiply(this.T[i-1]);
+                
+            }else{
 
-            // this.T[i].multiply(Tx);
-            // this.T[i].multiply(Ty);
-            // this.T[i].multiply(Tz);
-            // this.T[i].multiply(Rx);
-            // this.T[i].multiply(Ry);
-            // this.T[i].multiply(Rz);
+                var Tx = new THREE.Matrix4;
+                var Ty = new THREE.Matrix4;
+                var Tz = new THREE.Matrix4;
+                var Rx = new THREE.Matrix4;
+                var Ry = new THREE.Matrix4;
+                var Rz = new THREE.Matrix4;
 
-            // Denavit-Hartenberg
-            // this.T[i].set ( Math.cos(thetai), -Math.sin(thetai)*Math.cos(alphai), Math.sin(thetai)*Math.sin(alphai), ai*Math.cos(thetai),
-            //                 Math.sin(thetai),  Math.cos(thetai)*Math.cos(alphai),-Math.cos(thetai)*Math.sin(alphai), ai*Math.sin(thetai),
-            //                                0,                   Math.sin(alphai),                  Math.cos(alphai),                  di,
-            //                                0,                                  0,                                 0,                   1);
+                let tx = this.forwardKinematics[i][1];
+                let ty = this.forwardKinematics[i][2];
+                let tz = this.forwardKinematics[i][3] + jointT;
+                let rx = this.forwardKinematics[i][4];
+                let ry = this.forwardKinematics[i][5];
+                let rz = this.forwardKinematics[i][6] + jointR;
 
-            // Denavit-Hartenberg modified
-            // this.T[i].set (                 Math.cos(thetai),-Math.sin(thetai),0,ai,
-            // Math.sin(thetai)*Math.cos(alphai), Math.cos(thetai)*Math.cos(alphai), -Math.sin(alphai), -di*Math.sin(alphai),
-            // Math.sin(thetai)*Math.sin(alphai), Math.cos(thetai)*Math.sin(alphai), Math.cos(alphai),  di*Math.cos(alphai),
-            //                0,                                  0,                                 0,                   1);
+                let cx = Math.cos(rx); let sx = Math.sin(rx);
+                let cy = Math.cos(ry); let sy = Math.sin(ry);
+                let cz = Math.cos(rz); let sz = Math.sin(rz);
 
-            if (i > 0) {
-                this.T[i].premultiply(this.T[i - 1]);
+                // T[i] = Tx * Ty * Tz * Rx * Ry * Rz
+                this.T[i].set(cy * cz, -cy * sz, sy, tx,
+                    cx * sz + cz * sx * sy, cx * cz - sx * sy * sz, -cy * sx, ty,
+                    sx * sz - cx * cz * sy, cz * sx + cx * sy * sz, cx * cy, tz,
+                    0, 0, 0, 1);
+                // Rx.makeRotationX(rx);
+                // Ry.makeRotationY(ry);
+                // Rz.makeRotationZ(rz);
+                // Tx.makeTranslation(tx, 0, 0);
+                // Ty.makeTranslation( 0,ty, 0);
+                // Tz.makeTranslation( 0, 0,tz);
+
+                // this.T[i].multiply(Tx);
+                // this.T[i].multiply(Ty);
+                // this.T[i].multiply(Tz);
+                // this.T[i].multiply(Rx);
+                // this.T[i].multiply(Ry);
+                // this.T[i].multiply(Rz);
+
+                // Denavit-Hartenberg
+                // this.T[i].set ( Math.cos(thetai), -Math.sin(thetai)*Math.cos(alphai), Math.sin(thetai)*Math.sin(alphai), ai*Math.cos(thetai),
+                //                 Math.sin(thetai),  Math.cos(thetai)*Math.cos(alphai),-Math.cos(thetai)*Math.sin(alphai), ai*Math.sin(thetai),
+                //                                0,                   Math.sin(alphai),                  Math.cos(alphai),                  di,
+                //                                0,                                  0,                                 0,                   1);
+
+                // Denavit-Hartenberg modified
+                // this.T[i].set (                 Math.cos(thetai),-Math.sin(thetai),0,ai,
+                // Math.sin(thetai)*Math.cos(alphai), Math.cos(thetai)*Math.cos(alphai), -Math.sin(alphai), -di*Math.sin(alphai),
+                // Math.sin(thetai)*Math.sin(alphai), Math.cos(thetai)*Math.sin(alphai), Math.cos(alphai),  di*Math.cos(alphai),
+                //                0,                                  0,                                 0,                   1);
+
+                if (i > 0) {
+                    this.T[i].premultiply(this.T[i - 1]);
+                }
             }
         }
     }
@@ -270,8 +290,6 @@ class SerialRobot {
         for (let i = 0; i < this.nbDOFs; i++){
             let Ti = this.getJointTransform(i);
             let zi = new THREE.Vector3( Ti.elements[8], Ti.elements[9], Ti.elements[10]);
-            // console.log("z("+i+")");
-            // console.log(zi);
 
             if (this.jointTypes[i] == 'R'){
                 let Oi = [Ti.elements[12], Ti.elements[13], Ti.elements[14]];
@@ -303,6 +321,7 @@ class SerialRobot {
             } 
         }
 
+        console.log(J);
         return J;
     }
 
