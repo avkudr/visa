@@ -129,7 +129,21 @@ describe('Serial robot: Viper650', () => {
         await robot.init();
     });
 
-    it('robot Jacobian values #1 (fJe)', async () => {  
+    it('tool transform (fMe)', async () => {  
+        robot.setJointPos([0,-1.570000052,3.029999971,0,1.539999962,0]);
+        await robot.init();
+        let M = robot.getToolTransform();
+        let fMe = new THREE.Matrix4();
+
+        fMe.set (-0.9899924798,    -0,   0.1411201261,   0.3840822861,
+                             0,     1,              0,              0,
+                 -0.1411201261,     0,  -0.9899924798,   0.5472835408,
+                             0,     0,              0,              1);
+
+        expect(M).to.be.deep.almost(fMe);
+    });
+
+    it('robot geometric jacobian values #1 (fJe)', async () => {  
         robot.setJointPos([0,0,0,0,0,0]);
         await robot.init();
         let J = robot.get_fJe();
@@ -148,7 +162,7 @@ describe('Serial robot: Viper650', () => {
         expect(J).to.be.deep.almost(fJe);
     }); 
 
-    it('robot Jacobian values #2 (fJe)', async () => {  
+    it('robot geometric jacobian values #2 (fJe)', async () => {  
         robot.setJointPos([0,-1.570000052,3.029999971,0,1.539999962,0]);
         await robot.init();
         let J = robot.get_fJe();
@@ -167,24 +181,22 @@ describe('Serial robot: Viper650', () => {
         expect(J).to.be.deep.almost(fJe);
     }); 
 
-    // it('robot Jacobian values (eJe)', async () => {  
-    //     robot.setJointPos([0,-1.570000052,3.029999971,0,1.539999962,0]);
+    // it('robot analytical jacobian values (eJe)', async () => {  
+    //     robot.setJointPos([0.43,-2.64,4.10,-0.27,1.2828,-0.424]);
     //     await robot.init();
-    //     let eJe = robot.get_eJe();
-
-    //     let eJe_ = new Array(6);
+    //     let J = robot.get_eJe();
+    //     let fJe = new Array(6);
     //     for (let i = 0; i < 6; i++){
-    //         eJe_[i] = new Array(robot.nbDOFs);        
+    //         fJe[i] = new Array(robot.nbDOFs);        
     //     }
 
-    //     eJe_[0][0] = [0,-0.1665413778,0.100726167,0,0.1816,0];
-    //     eJe_[1][0] = [0.3840822861,0,0,0.1815138906,0,0];
-    //     eJe_[2][0] = [0,0.3359466189,0.2976313544,0,0,0];
-    //     eJe_[3][0] = [-0.1411201261,0,0,-0.9995258294,0,0];
-    //     eJe_[4][0] = [0,1,1,0,1,0];
-    //     eJe_[5][0] = [-0.9899924798,0,0,0.03079149721,0,1];
+    //     eJe[0] = [-0.09681829508,0.4639377997,0.4564989342,0.01007839076,0.08075052911,8.67361738e-18];
+    //     eJe[1] = [0.3893926229,0.1170785409,0.1320629325,0.005003325821,-0.1626588825,-6.938893904e-18];
+    //     eJe[2] = [-0.0207377694,-0.1761878417,0.0932933845,0,0,0];
+    //     eJe[3] = [-0.3383154983,-0.2658925564,-0.2658925564,-0.02755135364,0.895698692,0];
+    //     eJe[4] = [-0.03403499934,0.9620811498,0.9620811498,0.05549774649,0.4446615039,4.163336342e-17];
+    //     eJe[5] = [0.9404170577,-0.0608359248,-0.0608359248,0.9980786157,5.551115123e-17,1];
 
-    //     expect(eJe).to.be.deep.almost(eJe_);
-    // }); 
-
+    //     expect(J).to.be.deep.almost(eJe);
+    // });
 });
