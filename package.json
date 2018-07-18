@@ -10,7 +10,7 @@
   "author": "Andrey V. Kudryavtsev",
   "license": "GPL-3.0",
   "dependencies": {
-    "electron": "^1.7.9",
+    "electron": "^2.0.2",
     "net": "^1.0.2",
     "npm": "^6.1.0",
     "three": "^0.86.0",
