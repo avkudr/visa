@@ -3,6 +3,18 @@ const TrackballControls = require('three-trackballcontrols');
 const fs = require('fs');
 const path = require('path');
 
+const Stats = require('stats-js');
+
+var stats = new Stats();
+stats.setMode(0); // 0: fps, 1: ms
+ 
+// Align top-left
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.left = '0px';
+stats.domElement.style.top = '0px';
+ 
+document.body.appendChild( stats.domElement );
+
 const {Loaders} = require('./loaders.js');
 
 var Scene3D = function(container){
@@ -60,6 +72,8 @@ Scene3D.prototype.init = function(){
 }
 
 Scene3D.prototype.animate = function(){
+    
+    stats.begin();
     requestAnimationFrame( this.animate.bind(this) ); //loop animation
 
     //update relative positionning
@@ -68,8 +82,8 @@ Scene3D.prototype.animate = function(){
     }
 
     for (let camera of this.cameras){
-        camera.update();
-        camera.renderer.render(this.scene, camera.camera);
+        camera.update();      
+        camera.render(this.scene);
     }
 
     for (let robot of this.robots){
@@ -77,7 +91,9 @@ Scene3D.prototype.animate = function(){
     }
 
     this.trackballControls.update();
-    this.mainRenderer.render(this.scene, this.mainCamera);    
+    this.mainRenderer.render(this.scene, this.mainCamera);   
+    
+    stats.end();
 }
 
 Scene3D.prototype.onWindowResize =  function(){
@@ -218,10 +234,10 @@ Scene3D.prototype.loadModel = async function(path){
         for (let i = 0; i < data["cameras"].length; i++) {
             let camInfo = data["cameras"][i];
 
-            let camera = new Camera();
+            let w = camInfo.width;
+            let h = camInfo.height;
+            let camera = new Camera(w,h);
             camera.setFOV((camInfo.fieldOfView == undefined) ? 30 : camInfo.fieldOfView);
-            camera.setWidth((camInfo.width == undefined) ? 320 : camInfo.width);
-            camera.setHeight((camInfo.height == undefined) ? 240 : camInfo.height);
             //camera.setOrigin()
             camera.setPosition((camInfo.position == undefined) ? [0,0,0] : camInfo.position);
             camera.setRotation((camInfo.rotation == undefined) ? [0,0,0] : camInfo.rotation);

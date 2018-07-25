@@ -321,7 +321,6 @@ class SerialRobot {
             } 
         }
 
-        console.log(J);
         return J;
     }
 

@@ -13,6 +13,7 @@
     "electron": "^2.0.2",
     "net": "^1.0.2",
     "npm": "^6.1.0",
+    "stats-js": "^1.0.0-alpha1",
     "three": "^0.86.0",
     "three-trackballcontrols": "0.0.7"
   },

@@ -22,7 +22,10 @@ var modelFileName = 'default_model.js';
 function btnStartServerClicked() {
     var port = parseInt(document.getElementById("port").value,10);
     var host = document.getElementById("host").value;
-    ipc.send('to-server', ['start-server',port,host]);
+    ipc.send('to-server', {
+        cmd:'start-server',
+        data: [port,host]
+    });
 }
 
 function btnLoadModelClicked() {
@@ -36,9 +39,11 @@ function btnReloadModelClicked() {
 
 // Received command 'start-server' from one of the renderer processes
 ipc.on('command', function(event, arg) {
-    //console.log(model);
-    var response = mainController.handleMsg(arg);
-    ipc.send('to-server', ['send-message',response]);
+    let packet = {
+        cmd:'send-message',
+        data: mainController.handleMsg(arg)
+    }
+    ipc.send('to-server', packet);
 });
 
 function loadModelFileDialog(){
@@ -106,4 +111,4 @@ function loadModelFile(filename){
 }
 
 btnStartServerClicked();
-loadModelFile(appRootDir() + '/models/test_viper650.json');
+loadModelFile(appRootDir() + '/models/test_kukaiiwa.json');

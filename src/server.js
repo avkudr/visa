@@ -35,7 +35,8 @@ ipc.on('start-server', function(event, arg) {
 });
 
 ipc.on('send-message', function(event, arg) {
-    logToMain('Trying to send a message to ' + client.host + ':' + client.port);
+    //logToMain('Trying to send a message to ' + client.host + ':' + client.port);
+    
     sendMessage(client.port, client.host, arg);
 });
 
@@ -45,18 +46,26 @@ function isImage(message){
 }
 
 function sendMessage(port,host,message){
-    if ( isImage(message) ){
+    if (typeof message != "string") {
+        var prefix = "PACKAGE_LENGTH:" + message.length;    
+        var complete = new Array(500 - prefix.length).join( '_' );
+        prefix += complete;
+        socket.write(prefix + "\n");
+        socket.write(message);
+        socket.write("\n");  
+    }
+    else if ( isImage(message) ){
         var prefix = "PACKAGE_LENGTH:" + message.toString().length;    
         var complete = new Array(500 - prefix.length).join( '_' );
         prefix += complete;
         socket.write(prefix + "\n");    
-    }else{
-        if (message.toString().length < 500){
-            var complete = new Array(500 - message.toString().length).join( '_' );
-            message = message + '' + complete;
-        }
+        socket.write(message + "\n");
+    }else if (message.toString().length < 500){
+        var complete = new Array(500 - message.toString().length).join( '_' );
+        message = message + '' + complete;
+        socket.write(message + "\n");
     }    
-    socket.write(message + "\n");
+    
 }
 
 function startServer(port,host){

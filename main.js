@@ -38,17 +38,17 @@ function createWindow() {
 }  
 
 ipc.on('to-server', function(event, arg) {
-    console.log('Command to server received');
-    serverWindow.webContents.send(arg[0],arg.slice(1));
+    //console.log('Command to server received');
+    //console.log(typeof arg.data);
+    serverWindow.webContents.send(arg.cmd,arg.data);
 });
 
 ipc.on('cmd-received', function(event, arg) {
     mainWindow.webContents.send('command',arg);
-    console.log(arg);
 });
 
 ipc.on('send-to-log', function(event, arg) {
-    console.log('SERVER LOG: ' + arg);
+    //console.log('SERVER LOG: ' + arg);
 });
 
 
