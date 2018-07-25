@@ -177,7 +177,7 @@ Camera.prototype.getImage = function () {
         if (this.renderer === undefined) {
             return 'NO IMAGE TO SEND';
         } else {
-            let img = this.renderer.domElement.toDataURL();
+            let img = this.renderer.domElement.toDataURL('image/jpeg', 0.7);
             console.log('Image length: ' + img.length);
             if (img.length < Infinity) {
                 return img;
