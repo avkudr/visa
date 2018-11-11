@@ -20,13 +20,13 @@ THREE.Matrix4.prototype.normalizeRotations = function () {
     }
 }
 
-var Camera = function () {
+var Camera = function (width, height) {
     this.containter = 0;
     this.renderer = 0;
     this.cam = {};
 
-    this.height = 320;
-    this.width = 240;
+    this.width = (width == undefined) ? 320 : width;
+    this.height = (height == undefined) ? 240 : height;
     this.fieldOfView = 30;
     this.near = 0.01;
     this.far = 500;
@@ -37,6 +37,12 @@ var Camera = function () {
     this.origin = new THREE.Matrix4();
     this.position = [0, 0, 0];
     this.rotation = [0, 0, 0];
+
+    this.hiddenImg = document.createElement('img');
+    this.hiddenCanvas = document.createElement('canvas');
+
+    this.I = new Uint8Array(this.width * this.height);
+    this.buf = Buffer.from(this.I);
 }
 
 Camera.prototype.setFOV = function (f) {
@@ -119,9 +125,51 @@ Camera.prototype.update = function () {
     this.updatePose();
 }
 
+Camera.prototype.render = function (scene) {
+    this.renderer.render(scene, this.camera);
+
+    // let self = this;
+    // this.renderer.domElement.toBlob(function(blob) {
+    //     const url = URL.createObjectURL(blob);
+    //     let newImg = document.createElement('img');
+    //     let canvas = document.createElement('canvas');
+    //     let width = self.width;
+    //     let height = self.height;
+    //     canvas.width = width;
+    //     canvas.height = height;
+    //     newImg.onload = function() {
+    //     // no longer need to read the blob so it's revoked
+      
+    //         canvas.getContext('2d').drawImage(newImg, 0, 0, width,height);
+    //         let array = canvas.getContext('2d').getImageData(0, 0, width,height).data;
+    //         for (let i = 0; i < array.length / 4; i++){
+    //             let value = Math.round(0.21*array[4*i] + 0.72*array[4*i+1] + 0.07*array[4*i+2]);
+    //             self.I[i] = value;
+    //         }
+    //         URL.revokeObjectURL(url);
+    //     };
+    
+    //     newImg.src = url;
+    // });
+}
+
+
 Camera.prototype.toggleImageVisibility = function () {
     let cameraDivZIndex = document.getElementsByClassName('camera-div')[0];
     cameraDivZIndex.style.zIndex = (cameraDivZIndex.style.zIndex > 0) ? -10 : 10;
+}
+
+Camera.prototype.getImageBW = function () {
+    try {
+        if (this.renderer === undefined) {
+            return 'NO IMAGE TO SEND';
+        } else {
+            return this.I;
+        }
+    }
+    catch (e) {
+        return 'ERROR';
+    }
 }
 
 Camera.prototype.getImage = function () {
@@ -129,7 +177,7 @@ Camera.prototype.getImage = function () {
         if (this.renderer === undefined) {
             return 'NO IMAGE TO SEND';
         } else {
-            let img = this.renderer.domElement.toDataURL();
+            let img = this.renderer.domElement.toDataURL('image/jpeg', 0.7);
             console.log('Image length: ' + img.length);
             if (img.length < Infinity) {
                 return img;

@@ -22,6 +22,9 @@ CameraController.prototype.handle = function(arg){
         }
         case 'GETIMAGE':{
             return this.camera.getImage();
+        }  
+        case 'GETIMAGEBW':{
+            return this.camera.getImageBW();
         }    
         default:
             return 'unknown command';
