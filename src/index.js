@@ -15,6 +15,7 @@ var mainController = new MainController();
 function appRootDir() { return remote.getGlobal("appRootDir"); }
 function appLibsDir() { return remote.getGlobal("appLibsDir"); }
 function appModelsDir() { return remote.getGlobal("appModelsDir"); }
+function isDevMode() {return remote.getGlobal("devMode"); }
 
 var model;
 var modelFileName = 'default_model.js';

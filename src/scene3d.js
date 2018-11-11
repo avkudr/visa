@@ -3,17 +3,18 @@ const TrackballControls = require('three-trackballcontrols');
 const fs = require('fs');
 const path = require('path');
 
-const Stats = require('stats-js');
-
-var stats = new Stats();
-stats.setMode(0); // 0: fps, 1: ms
- 
-// Align top-left
-stats.domElement.style.position = 'absolute';
-stats.domElement.style.left = '0px';
-stats.domElement.style.top = '0px';
- 
-document.body.appendChild( stats.domElement );
+console.log("Dev mode is activated: " + isDevMode());
+if (isDevMode()){
+    console.log("Adding stats to the main screen");
+    const Stats = require('stats-js');
+    var stats = new Stats();
+    stats.setMode(0); // 0: fps, 1: ms
+    // Align top-left
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.left = '0px';
+    stats.domElement.style.top = '0px';
+    document.getElementById("container").appendChild( stats.domElement );
+}
 
 const {Loaders} = require('./loaders.js');
 
@@ -73,7 +74,7 @@ Scene3D.prototype.init = function(){
 
 Scene3D.prototype.animate = function(){
     
-    stats.begin();
+    if (global.devMode) stats.begin();
     requestAnimationFrame( this.animate.bind(this) ); //loop animation
 
     //update relative positionning
@@ -93,7 +94,7 @@ Scene3D.prototype.animate = function(){
     this.trackballControls.update();
     this.mainRenderer.render(this.scene, this.mainCamera);   
     
-    stats.end();
+    if (global.devMode) stats.end();
 }
 
 Scene3D.prototype.onWindowResize =  function(){
