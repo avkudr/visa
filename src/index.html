@@ -4,15 +4,32 @@
       <meta charset = "UTF-8">
       <title>Simulation Tool for ViSP library</title>
       <link rel="stylesheet" href="css/index.css">
+      <link rel="stylesheet" href="css/photon.min.css">
    </head>
    
    <body>
         <header class="toolbar toolbar-header">
-            <button id="btn-start-server" onclick="btnStartServerClicked()">Restart server</button>
-            <input id="host" type="text" value="127.0.0.1" />
-            <input id="port" type="text" value="1234" />
-            <button id="btn-load-model" onclick="btnLoadModelClicked()">Load model</button>
-            <button id="btn-reload-model" onclick="btnReloadModelClicked()">Reload</button>
+            <div class="toolbar-actions">
+                <button class="btn btn-default" id="btn-start-server" onclick="btnStartServerClicked()">
+                    <span class="icon icon-globe"></span>&nbsp Restart server
+                </button>
+                <input class="form-control" id="host" type="text" value="127.0.0.1" />
+                <input class="form-control" id="port" type="text" value="4000" />
+                <select class="form-control" id="socket-type">
+                    <option>TCP</option>
+                    <option>UDP</option>
+                </select>
+                <button class="btn btn-default" id="btn-load-model" onclick="btnLoadModelClicked()">
+                    <span class="icon icon-folder"></span>&nbsp Load model
+                </button>
+                <button class="btn btn-default" id="btn-reload-model" onclick="btnReloadModelClicked()">
+                    <span class="icon icon-arrows-ccw"></span>&nbsp Reload
+                </button>
+
+                <button class="btn btn-default pull-right" onclick="alert('Hello from https://github.com/avkudr/visa')">
+                    <span class="icon icon-github"></span>
+                </button>
+            </div>
         </header>
 
         <div id="loading">
@@ -23,6 +40,7 @@
             </div>
         </div>
         <div id="container"></div>
-        <script src="index.js" charset="utf-8"></script>
    </body>
+
+   <script src="index.js" charset="utf-8"></script>
 </html>

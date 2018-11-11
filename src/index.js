@@ -21,11 +21,12 @@ var model;
 var modelFileName = 'default_model.js';
 
 function btnStartServerClicked() {
+    var socketType = document.getElementById("socket-type").value;
     var port = parseInt(document.getElementById("port").value,10);
     var host = document.getElementById("host").value;
     ipc.send('to-server', {
         cmd:'start-server',
-        data: [port,host]
+        data: [socketType,port,host]
     });
 }
 

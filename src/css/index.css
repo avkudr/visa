@@ -14,11 +14,14 @@ body{
     padding:0;
     overflow:hidden;
 }
+
+/*
 header {
     display:block;
     height: 30px;
     background-color: #e5e5e5;
 }
+*/
 
 #container {
     position: absolute;
@@ -37,7 +40,6 @@ header {
 
 #loading {
     position: absolute;
-    bottom: 0;
     left: 0;
     z-index: 100;
     width: 100vw;

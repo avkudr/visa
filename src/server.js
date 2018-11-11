@@ -1,24 +1,26 @@
 const dgram = require('dgram');
+const net   = require('net');
 const ipc   = require('electron').ipcRenderer; 
 
 let server;
 let serverStarted = false;
 let serverHost;
 
-// default client
-let client = {};
+var client = [];
+var socket = [];
+
+let port;
 
 // Received command 'start-server' from one of the renderer processes
 ipc.on('start-server', function(event, arg) {
+
+    let socketType = arg[0];
+    let port = arg[1];
+    let host = arg[2];
     if (!serverStarted){
-        startServer(arg[0],arg[1]);
-        let myNotification = new Notification('CTR-SIMU', {
-            body: 'Server started on ' + arg[1] + ':' + arg[0]
-        })
+        if      ( socketType === "UDP") startServerUDP(port,host);
+        else if ( socketType === "TCP") startServerTCP(port,host);
     }else{
-        let myNotification = new Notification('CTR-SIMU', {
-            body: 'Server is already active'
-        })
     }
 });
 
@@ -82,17 +84,7 @@ function sendMessageErrorCallback(error){
     }
 }
 
-
-function sendMessageErrorCallback(error){
-    if(error){
-        logToMain('cant send data');
-    }else{
-        logToMain('data sent');
-    }
-}
-
-
-function startServer(port,host){
+function startServerUDP(port,host){
     if (!serverStarted){
         server = dgram.createSocket('udp4');
         server.on('listening', function () { 
@@ -100,7 +92,7 @@ function startServer(port,host){
             serverStarted = true;
         });
         server.on('message', receiveMessage);
-        server.on('error', (err) => {
+        server.on('error', () => {
             alert('Server error:\n${err.stack}\nTry to restart the server');
             server.close();
         });
@@ -112,14 +104,34 @@ function startServer(port,host){
     }
 }
 
+function startServerTCP(port,host){
+    server = net.createServer();
+
+    server.on('connection', function(sock) {   
+        logToMain('CONNECTED: ' + sock.remoteAddress +':'+ sock.remotePort);
+        // other stuff is the same from here
+        client.port = sock.remotePort;
+        client.host = sock.remoteAddress; 
+        socket = sock;
+        // Add a 'data' event handler to this instance of socket
+        sock.on('data', function(msg) {
+            receiveMessage(msg);
+        });
+    });
+           
+    // Add a 'close' event handler to this instance of socket
+    server.on('close', function(data) {
+        console.log('CLOSED: ' + server.remoteAddress +' '+ server.remotePort);
+    });       
+
+    server.listen(port, host);
+}
+
 function logToMain(message){
     ipc.send('send-to-log',message);
 }
 
 function receiveMessage (message, remote) {
-    // remote - who sended the message
-    
-    let temp = 222;
     
     message = message.toString('utf8');
     message = message.replace(/(\r\n|\n|\r)/gm,"");   
@@ -138,23 +150,4 @@ function receiveMessage (message, remote) {
     }
 
     ipc.send('cmd-received',[cmd,q]);
-
-    // if (isCmdLegal(cmd))  ipc.send('cmd-received',[cmd,q]);
-    // else sendMessage(client.port,client.host,"Unknown command");
-    //else                  do something;
 }
-
-//
-// ─── MESSAGE HANDLING ───────────────────────────────────────────────────────────
-// 
-
-// const knownCmds = [
-//     'TYPEJOG', //choose movement type: 10-joint,11-current_tool,12-current_frame
-//     'SETPOS',
-//     'ADDPOS',
-// ]
-
-// function isCmdLegal(cmd,q = []){
-//     //check if the command is known
-//     return knownCmds.includes(cmd);
-// }
