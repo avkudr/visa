@@ -5,6 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
+    "start-dev": "electron . --dev",
     "test": "mocha --inline-diffs || true"
   },
   "author": "Andrey V. Kudryavtsev",

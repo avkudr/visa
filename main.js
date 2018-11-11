@@ -5,6 +5,7 @@ const ipc = require('electron').ipcMain;
 
 let mainWindow, serverWindow; 
 
+global.devMode = (process.argv.indexOf("--dev") > -1);    
 global.appRootDir = path.resolve(__dirname);
 global.appLibsDir = path.resolve(__dirname + '/3rdparty');
 global.appModelsDir = path.resolve(__dirname + '/models');
@@ -29,7 +30,7 @@ function createWindow() {
     }) 
     mainWindow.maximize();
     mainWindow.loadURL('file://' + __dirname + '/src/index.html');
-    mainWindow.toggleDevTools();
+    if (global.devMode) mainWindow.toggleDevTools();
 
     mainWindow.on('close', (e) => { app.quit(); });
 
