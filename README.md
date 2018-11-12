@@ -38,6 +38,11 @@ Then, from your command line:
     npm install
     npm start
 
+If you want to start the software in development mode ( displaying fps and console) use:
+
+    npm run dev # instead of "npm start"
+
+
 ## Main dependencies
 
 - [nodejs](https://nodejs.org/en/)

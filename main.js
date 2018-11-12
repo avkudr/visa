@@ -49,7 +49,7 @@ ipc.on('cmd-received', function(event, arg) {
 });
 
 ipc.on('send-to-log', function(event, arg) {
-    //console.log('SERVER LOG: ' + arg);
+    console.log('SERVER LOG: ' + arg);
 });
 
 

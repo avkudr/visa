@@ -14,13 +14,21 @@ let port;
 // Received command 'start-server' from one of the renderer processes
 ipc.on('start-server', function(event, arg) {
 
-    let socketType = arg[0];
-    let port = arg[1];
-    let host = arg[2];
-    if (!serverStarted){
-        if      ( socketType === "UDP") startServerUDP(port,host);
-        else if ( socketType === "TCP") startServerTCP(port,host);
-    }else{
+    socketType = arg[0];
+    port = arg[1];
+    host = arg[2];
+
+    logToMain('Starting a ' + socketType + 'server on ' + host + ':' + port);
+    
+    if (server){
+        if (server.close  ) server.close();
+        if (server.destroy) server.destroy();
+    }
+
+    switch(socketType){
+        case "UDP": startServerUDP(port,host); break;
+        case "TCP": startServerTCP(port,host); break;
+        default: break;
     }
 });
 
@@ -105,7 +113,8 @@ function startServerUDP(port,host){
 }
 
 function startServerTCP(port,host){
-    server = net.createServer();
+
+    server = net.createServer(net.UDP);
 
     server.on('connection', function(sock) {   
         logToMain('CONNECTED: ' + sock.remoteAddress +':'+ sock.remotePort);
@@ -114,10 +123,12 @@ function startServerTCP(port,host){
         client.host = sock.remoteAddress; 
         socket = sock;
         // Add a 'data' event handler to this instance of socket
-        sock.on('data', function(msg) {
-            receiveMessage(msg);
+        sock.on('data', function(data) {
+            receiveMessage(data);
         });
     });
+
+
            
     // Add a 'close' event handler to this instance of socket
     server.on('close', function(data) {
@@ -135,12 +146,15 @@ function receiveMessage (message, remote) {
     
     message = message.toString('utf8');
     message = message.replace(/(\r\n|\n|\r)/gm,"");   
-    logToMain('Message received from ' + serverHost + ':' + remote.port + ' (' + message + ')');
+    //logToMain('Message received from ' + serverHost + ':' + remote.port + ' (' + message + ')');
+    //alert('Message received from ' + serverHost + ':' + remote.port + ' (' + message + ')');
     
-    client.port = remote.port;
-    client.host = serverHost;   
+    //client.port = remote.port;
+    //client.host = serverHost;   
 
     var msgArray = message.toString('utf8').split(",");
+
+    logToMain(msgArray);
 
     var cmd = msgArray[0];
  

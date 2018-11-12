@@ -74,7 +74,7 @@ Scene3D.prototype.init = function(){
 
 Scene3D.prototype.animate = function(){
     
-    if (global.devMode) stats.begin();
+    if (isDevMode()) stats.begin();
     requestAnimationFrame( this.animate.bind(this) ); //loop animation
 
     //update relative positionning
@@ -94,7 +94,7 @@ Scene3D.prototype.animate = function(){
     this.trackballControls.update();
     this.mainRenderer.render(this.scene, this.mainCamera);   
     
-    if (global.devMode) stats.end();
+    if (isDevMode()) stats.end();
 }
 
 Scene3D.prototype.onWindowResize =  function(){
