@@ -1,6 +1,7 @@
 const ipc    = require('electron').ipcRenderer; 
 const remote = require('electron').remote;
 const fs     = require('fs');
+const swal  = require('sweetalert'); 
 
 const Scene3D = require('./scene3d.js').Scene3D;
 var scene3D = new Scene3D(document.getElementById('container'));
@@ -46,6 +47,10 @@ ipc.on('command', function(event, arg) {
         data: mainController.handleMsg(arg)
     }
     ipc.send('to-server', packet);
+});
+
+ipc.on('alert', function(event, arg) {
+    swal(arg);
 });
 
 function loadModelFileDialog(){
@@ -113,4 +118,4 @@ function loadModelFile(filename){
 }
 
 btnStartServerClicked();
-loadModelFile(appRootDir() + '/models/test_kukaiiwa.json');
+loadModelFile(appRootDir() + '/models/test_viper650.json');

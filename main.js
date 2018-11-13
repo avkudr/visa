@@ -52,5 +52,9 @@ ipc.on('send-to-log', function(event, arg) {
     console.log('SERVER LOG: ' + arg);
 });
 
+ipc.on('alert', function(event, arg) {
+    mainWindow.webContents.send('alert',arg);
+});
+
 
 app.on('ready', createWindow) 

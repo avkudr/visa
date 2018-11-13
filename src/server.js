@@ -2,10 +2,12 @@ const dgram = require('dgram');
 const net   = require('net');
 const ipc   = require('electron').ipcRenderer; 
 
+
 let server;
 let serverStarted = false;
 let serverHost;
 
+var socketType;
 var client = [];
 var socket = [];
 
@@ -18,8 +20,15 @@ ipc.on('start-server', function(event, arg) {
     port = arg[1];
     host = arg[2];
 
-    logToMain('Starting a ' + socketType + 'server on ' + host + ':' + port);
-    
+    logToMain('Starting a ' + socketType + ' server on ' + host + ':' + port);
+    alertToMain({
+        title: "Good job!",
+        text: "Starting a " + socketType + ' server on ' + host + ':' + port,
+        icon: "success",
+        timer: 3000
+    });
+
+
     if (server){
         if (server.close  ) server.close();
         if (server.destroy) server.destroy();
@@ -43,24 +52,40 @@ function isImage(message){
 }
 
 function sendMessage(port,host,message){
+    
     if (typeof message != "string") {
         var prefix = "PACKAGE_LENGTH:" + message.length;    
         var complete = new Array(500 - prefix.length).join( '_' );
         prefix += complete;
-        server.send(prefix + "\n",port,host,function(error){sendMessageErrorCallback(error)});
-        server.send(message,port,host,function(error){sendMessageErrorCallback(error)});
-        server.send("\n",port,host,function(error){sendMessageErrorCallback(error)}); 
+        if ( socketType == "UDP"){
+            server.send(prefix + "\n",port,host,function(error){sendMessageErrorCallback(error)});
+            server.send(message,port,host,function(error){sendMessageErrorCallback(error)});
+            server.send("\n",port,host,function(error){sendMessageErrorCallback(error)}); 
+        }else{
+            socket.write(prefix + "\n");
+            socket.write(message);
+            socket.write("\n"); 
+        }
     }
     else if ( isImage(message) ){
         var prefix = "PACKAGE_LENGTH:" + message.toString().length;    
         var complete = new Array(500 - prefix.length).join( '_' );
         prefix += complete;
-        server.send(prefix + "\n",port,host,function(error){sendMessageErrorCallback(error)});
-        server.send(message + "\n",port,host,function(error){sendMessageErrorCallback(error)});
+        if ( socketType == "UDP"){
+            server.send(prefix + "\n",port,host,function(error){sendMessageErrorCallback(error)});
+            server.send(message + "\n",port,host,function(error){sendMessageErrorCallback(error)});
+        } else {
+            socket.write(prefix + "\n");
+            socket.write(message + "\n");
+        }
     }else if (message.toString().length < 500){
         var complete = new Array(500 - message.toString().length).join( '_' );
         message = message + '' + complete;
-        server.send(message + "\n",port,host,function(error){sendMessageErrorCallback(error)});
+        if ( socketType == "UDP"){
+            server.send(message + "\n",port,host,function(error){sendMessageErrorCallback(error)});
+        }else{
+            socket.write(message + "\n");
+        }
     }    
     
 }
@@ -114,7 +139,7 @@ function startServerUDP(port,host){
 
 function startServerTCP(port,host){
 
-    server = net.createServer(net.UDP);
+    server = net.createServer();
 
     server.on('connection', function(sock) {   
         logToMain('CONNECTED: ' + sock.remoteAddress +':'+ sock.remotePort);
@@ -127,8 +152,6 @@ function startServerTCP(port,host){
             receiveMessage(data);
         });
     });
-
-
            
     // Add a 'close' event handler to this instance of socket
     server.on('close', function(data) {
@@ -142,6 +165,10 @@ function logToMain(message){
     ipc.send('send-to-log',message);
 }
 
+function alertToMain(message){
+    ipc.send('alert',message);
+}
+
 function receiveMessage (message, remote) {
     
     message = message.toString('utf8');
@@ -149,8 +176,10 @@ function receiveMessage (message, remote) {
     //logToMain('Message received from ' + serverHost + ':' + remote.port + ' (' + message + ')');
     //alert('Message received from ' + serverHost + ':' + remote.port + ' (' + message + ')');
     
-    //client.port = remote.port;
-    //client.host = serverHost;   
+    if (socketType == "UDP"){
+        client.port = remote.port;
+        client.host = serverHost;   
+    }
 
     var msgArray = message.toString('utf8').split(",");
 
