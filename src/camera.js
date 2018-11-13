@@ -177,7 +177,12 @@ Camera.prototype.getImage = function () {
         if (this.renderer === undefined) {
             return 'NO IMAGE TO SEND';
         } else {
-            let img = this.renderer.domElement.toDataURL('image/jpeg', 0.7);
+            let img = this.renderer.domElement.toDataURL('image/png');
+            if ( img.length > 60000) img = this.renderer.domElement.toDataURL('image/jpeg', 0.9);
+            if ( img.length > 60000) img = this.renderer.domElement.toDataURL('image/jpeg', 0.8);
+            if ( img.length > 60000) img = this.renderer.domElement.toDataURL('image/jpeg', 0.7);
+            if ( img.length > 60000) img = this.renderer.domElement.toDataURL('image/jpeg', 0.6);
+            
             console.log('Image length: ' + img.length);
             if (img.length < Infinity) {
                 return img;
