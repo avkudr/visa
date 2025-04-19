@@ -19,7 +19,7 @@ The last type of model object is  **cameras**. VISA enables placing a virtual ca
 
 ## Screenshots <a name="screenshots"></a>
 <p align="center">
-<img alt="Screenshot of visa simulator with KUKA robot and a calibration target" src="https://avkudr.github.io/assets/img/visa_screenshot.png" width="80%">
+<img alt="Screenshot of visa simulator with KUKA robot and a calibration target" src="visa_screenshot.png" width="80%">
 </p>
 
 # Installation <a name="installation"></a> 
